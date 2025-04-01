@@ -17,7 +17,7 @@ export const useCheckout = () => {
   const checkoutProduct = async (
     product: Product,
     useDynamicPaymentLinks: boolean,
-    amount: number
+    amount: number = 200
   ) => {
     if (useDynamicPaymentLinks) {
       const productType = "onetime";
