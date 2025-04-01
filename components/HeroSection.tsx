@@ -251,23 +251,7 @@ const HeroSection: React.FC = () => {
       {/* Subtle background elements with animation */}
       <div className="absolute inset-0 w-full overflow-hidden">
         {/* Shooting stars */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <AnimatePresence>
-            {stars.map((star) => (
-              <ShootingStar
-                key={star.id}
-                delay={star.delay}
-                top={star.top}
-                left={star.left}
-                size={star.size}
-                rotation={star.rotation}
-                speed={star.speed}
-                trail={star.trail}
-                color={star.color}
-              />
-            ))}
-          </AnimatePresence>
-        </div>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none"></div>
 
         <motion.div
           className={`absolute top-20 left-10 w-64 h-64 rounded-full ${
@@ -337,6 +321,30 @@ const HeroSection: React.FC = () => {
                 className="flex items-center"
               >
                 Create Your Quote
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </motion.span>
+            </Link>
+            <Link
+              href="/chat"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-8 rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg"
+            >
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center"
+              >
+                Create Your Image
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 ml-2"

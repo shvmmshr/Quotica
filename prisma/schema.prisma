@@ -14,7 +14,48 @@ model User {
   firstName String?
   lastName  String?
   avatarUrl String?
-  paid      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  chatSessions ChatSession[]
+  transactions Transaction[]
+}
+
+model ChatSession {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  user      User      @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  messages  Message[]
+  images    ImageGeneration[]
+  createdAt DateTime  @default(now())
+  title     String
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatSession ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  chatSessionId String
+  role        String   // "user" or "assistant"
+  content     String   // Text content of the message
+  createdAt   DateTime @default(now())
+}
+
+model ImageGeneration {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatSession ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  chatSessionId String
+  userId      String
+  prompt      String    // Text prompt used
+  imageUrl    String    // URL of generated image
+  creditsUsed Int
+  createdAt   DateTime  @default(now())
+}
+
+model Transaction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  user      User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  type      String   // "credit" (purchase) or "debit" (image generation)
+  amount    Int
+  createdAt DateTime @default(now())
 }
