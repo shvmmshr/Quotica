@@ -1,11 +1,12 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { useCheckout } from "@/lib/checkoutDodo";
 import { useUser } from "@clerk/nextjs";
-import { use } from "react";
+// import { use } from "react";
 import { productsMap } from "@/data/productInfo";
+import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
 
 type Product = {
   product_id: string;
@@ -22,66 +23,100 @@ export default function SubscriptionPage() {
   const fullName = user?.fullName || "";
   const { checkoutProduct } = useCheckout();
   const type = "creditsRecharge";
-  const { productId, productName, productType } = productsMap[type];
-  const product: Product = {
-    product_id: productId,
-    name: productName,
-    redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
-    userId: userId,
-    email: email,
-    fullName: fullName,
+  const { productId, productName } = productsMap[type];
+
+  const [amount, setAmount] = useState(2);
+
+  // Calculate credits with bonus
+  const calculateCredits = (dollars: number) => {
+    const baseCredits = dollars * 10;
+    let bonusPercentage = 0;
+
+    if (dollars >= 5 && dollars < 10) {
+      bonusPercentage = 10;
+    } else if (dollars >= 10 && dollars <= 20) {
+      bonusPercentage = 15;
+    } else if (dollars > 20 && dollars <= 50) {
+      bonusPercentage = 20;
+    }
+
+    const bonusCredits = Math.round(baseCredits * (bonusPercentage / 100));
+    return {
+      baseCredits,
+      bonusCredits,
+      totalCredits: baseCredits + bonusCredits,
+      bonusPercentage,
+    };
   };
+
+  const creditDetails = calculateCredits(amount);
 
   const handlePayment = async () => {
     try {
-      await checkoutProduct(product, true);
+      const product: Product = {
+        product_id: productId,
+        name: productName,
+        redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+        userId: userId,
+        email: email,
+        fullName: fullName,
+      };
+
+      await checkoutProduct(product, true, amount * 100); // Convert to cents
     } catch (error) {
       console.error("Error during checkout:", error);
     }
   };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-3xl font-bold mb-6">Choose Your Plan</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
-        {/* Free Plan */}
-        <Card className="border border-gray-300">
-          <CardHeader>
-            <CardTitle className="text-xl">Free Plan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-4 space-y-2">
-              <li>Basic AI-generated quotes</li>
-              <li>Limited customization options</li>
-              <li>Watermarked images</li>
-            </ul>
-            <Link href="/editor">
-              <Button className="w-full mt-4" variant="outline" disabled>
-                Current Plan
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* Paid Plan */}
+      <h1 className="text-3xl font-bold mb-6">Purchase Credits</h1>
+      <div className="w-full max-w-md">
         <Card className="border border-green-500">
           <CardHeader>
-            <CardTitle className="text-xl">Lifetime Plan</CardTitle>
+            <CardTitle className="text-xl">Credit Recharge</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-4 space-y-2">
-              <li>Unlimited AI-generated quotes</li>
-              <li>Full customization options</li>
-              <li>No watermark</li>
-              <li>Lifetime access</li>
-            </ul>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Amount: ${amount}</span>
+                <span>{creditDetails.totalCredits} credits</span>
+              </div>
+              <Slider
+                value={[amount]}
+                min={2}
+                max={50}
+                step={1}
+                onValueChange={(value) => setAmount(value[0])}
+                className="py-4"
+              />
+              <div className="text-sm text-muted-foreground flex justify-between">
+                <span>$2</span>
+                <span>$50</span>
+              </div>
+            </div>
+
+            <div className="bg-muted p-3 rounded-md text-sm">
+              <p>
+                <strong>Base Credits:</strong> {creditDetails.baseCredits}
+              </p>
+              {creditDetails.bonusCredits > 0 && (
+                <p>
+                  <strong>
+                    Bonus Credits ({creditDetails.bonusPercentage}%):
+                  </strong>{" "}
+                  {creditDetails.bonusCredits}
+                </p>
+              )}
+              <p className="font-bold mt-1">
+                Total: {creditDetails.totalCredits} credits
+              </p>
+            </div>
 
             <Button
-              className="w-full mt-4 bg-green-500 hover:bg-green-600"
-              onClick={() => {
-                handlePayment();
-              }}
+              className="w-full bg-green-500 hover:bg-green-600"
+              onClick={handlePayment}
             >
-              Get Lifetime Access - $10
+              Purchase ${amount} ({creditDetails.totalCredits} credits)
             </Button>
           </CardContent>
         </Card>

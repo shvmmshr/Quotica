@@ -13,7 +13,6 @@ type Product = {
 
 export const useCheckout = () => {
   const router = useRouter();
-  const amount = 200;
 
   const checkoutProduct = async (
     product: Product,
