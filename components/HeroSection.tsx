@@ -6,6 +6,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import Lenis from "lenis";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Button } from "./ui/button";
+import { ArrowRight } from "lucide-react";
 
 // Component for a single shooting star
 interface ShootingStarProps {
@@ -307,59 +310,78 @@ const HeroSection: React.FC = () => {
             suggestions.
           </motion.p>
 
-          <motion.div
-            className="flex flex-col sm:flex-row gap-5 justify-center"
-            variants={fadeIn}
-          >
-            <Link
-              href="/editor"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-8 rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg"
+          <SignedIn>
+            <motion.div
+              className="flex flex-col sm:flex-row gap-5 justify-center"
+              variants={fadeIn}
             >
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center"
+              <Link
+                href="/editor"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-8 rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg"
               >
-                Create Your Quote
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </motion.span>
-            </Link>
-            <Link
-              href="/chat"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-8 rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg"
+                  Create Your Quote
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 ml-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </motion.span>
+              </Link>
+              <Link
+                href="/chat"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-8 rounded-lg transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg"
+              >
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center"
+                >
+                  Create Your Image
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 ml-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </motion.span>
+              </Link>
+            </motion.div>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton
+              fallbackRedirectUrl="/"
+              signUpFallbackRedirectUrl="/"
+              mode="modal"
             >
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center"
+              <Button
+                size="lg"
+                className="group relative h-12 overflow-hidden rounded-full bg-purple-600 px-8 font-medium text-white transition-all hover:bg-purple-700 hover:shadow-lg"
               >
-                Create Your Image
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </motion.span>
-            </Link>
-          </motion.div>
+                <span className="relative z-10 flex items-center gap-2">
+                  sign in
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Button>
+            </SignInButton>
+          </SignedOut>
         </motion.div>
 
         {/* Demo Preview with animation */}

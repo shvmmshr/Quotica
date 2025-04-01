@@ -17,6 +17,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  credits   Int      @default(0)
+  
   chatSessions ChatSession[]
   transactions Transaction[]
 }
@@ -55,7 +57,7 @@ model Transaction {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String
   user      User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
-  type      String   // "credit" (purchase) or "debit" (image generation)
+  type      String   
   amount    Int
   createdAt DateTime @default(now())
 }
