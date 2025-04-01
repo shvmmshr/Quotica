@@ -8,8 +8,6 @@ import {
   Send,
   Upload,
   CreditCard,
-  Sun,
-  Moon,
   ArrowLeft,
   Trash2,
 } from "lucide-react";
@@ -19,7 +17,7 @@ import { useTheme } from "next-themes";
 export default function ImageStudioPage() {
   const { user, isLoaded } = useUser();
   const userId = user?.id || "guest";
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
 
   const [prompt, setPrompt] = useState("");
   const [selectedModel, setSelectedModel] = useState<ImageModelOption>(
@@ -113,45 +111,6 @@ export default function ImageStudioPage() {
         }`}
       >
         <h1 className="text-xl font-bold">Quotify Image Creator</h1>
-        <div className="flex items-center gap-4">
-          <div
-            className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-              theme === "dark" ? "bg-gray-800" : "bg-white border"
-            }`}
-          >
-            <span className="text-sm font-medium">Credits:</span>
-            <span
-              className={`text-sm font-bold ${
-                availableCredits < 1 ? "text-red-500" : "text-green-500"
-              }`}
-            >
-              {availableCredits.toFixed(2)}
-            </span>
-          </div>
-          <Link href="/membership">
-            <button
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-md ${
-                theme === "dark"
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-blue-500 hover:bg-blue-600"
-              } text-white`}
-            >
-              <CreditCard size={16} />
-              <span className="text-sm">Add Credits</span>
-            </button>
-          </Link>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className={`p-2 rounded-full ${
-              theme === "dark"
-                ? "bg-gray-800 hover:bg-gray-700"
-                : "bg-white hover:bg-gray-100 border"
-            }`}
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
