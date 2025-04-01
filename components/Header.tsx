@@ -11,18 +11,11 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Pacifico } from "next/font/google";
 
-// Load the Pacifico font for a calligraphic style
 const pacifico = Pacifico({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
-
-function handleProMemberUpgrade() {
-  // Add your CRED payment gateway integration here
-  // This is a placeholder function
-  console.log("Redirecting to CRED payment gateway...");
-}
 
 export default function Header() {
   return (
@@ -37,9 +30,12 @@ export default function Header() {
         </div>
         <nav className="flex items-center gap-4">
           <SignedIn>
-            <Button variant="ghost" size="sm" onClick={handleProMemberUpgrade}>
-              Become a Pro Member
-            </Button>
+            <Link href="/membership">
+              <Button variant="ghost" size="sm">
+                Become a Pro Member
+              </Button>
+            </Link>
+
             <UserButton />
           </SignedIn>
           <SignedOut>
