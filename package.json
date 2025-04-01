@@ -34,6 +34,7 @@
     "clsx": "^2.1.1",
     "dodopayments": "^1.11.0",
     "dom-to-image": "^2.6.0",
+    "dotenv": "^16.4.7",
     "framer-motion": "^12.5.0",
     "html2canvas": "^1.4.1",
     "langchain": "^0.3.19",
