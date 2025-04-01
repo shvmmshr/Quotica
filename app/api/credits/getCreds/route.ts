@@ -1,38 +1,33 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma"; // Adjust the import path as necessary
 
-const getCredits = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { userId } = req.query; // Extracting the userId from query params
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId");
+
   console.log("userId:", userId);
-  // Check if userId is provided and is a string
-  if (!userId || typeof userId !== "string") {
-    return res.status(400).json({ error: "Invalid user ID" });
+
+  if (!userId) {
+    return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
   }
 
   try {
-    // Fetch user data from Prisma, ensuring we also count credits
+    // Fetch user data from Prisma
     const user = await prisma.user.findUnique({
-      where: {
-        clerkId: userId, // Find user by clerkId (Clerk's user ID)
-      },
-      include: {
-        credits: true,
-      },
+      where: { clerkId: userId },
+      select: { credits: true },
     });
 
-    // If user not found, return an error
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Calculate total credits (assuming credits are stored in transactions, adjust this logic as necessary)
-
-    // Return the total credits
-    return res.status(200).json({ credits: user.credits });
+    return NextResponse.json({ credits: user.credits }, { status: 200 });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-};
-
-export default getCredits;
+}

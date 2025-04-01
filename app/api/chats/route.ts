@@ -1,39 +1,30 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { title } from "process";
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma"; // Adjust the import path as necessary
 
-// Fetch chats for a given userId
-export async function GET(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const userId = url.searchParams.get("userId");
-
+    const body = await req.json();
+    const { userId } = body;
     if (!userId) {
       return NextResponse.json(
-        { error: "userId is required" },
+        { error: "User ID is required" },
         { status: 400 }
       );
     }
 
-    // Fetch chat sessions for the user
-    const chatSessions = await prisma.chatSession.findMany({
-      where: {
-        userId: userId,
-      },
-      select: {
-        id: true,
-        title: true,
-      },
-      orderBy: {
-        createdAt: "desc", // Optional: Order by creation date (newest first)
+    // Create a new chat session
+    const newChat = await prisma.chatSession.create({
+      data: {
+        userId,
+        title: "New Chat", // Default title
       },
     });
 
-    return NextResponse.json(chatSessions);
+    return NextResponse.json({ chatId: newChat.id }, { status: 201 });
   } catch (error) {
-    console.error("Error fetching chats:", error);
+    console.error("Error creating chat session:", error);
     return NextResponse.json(
-      { error: "Error fetching chats" },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

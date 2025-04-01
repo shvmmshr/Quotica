@@ -62,7 +62,9 @@ export default function SubscriptionPage() {
         fullName: fullName,
       };
 
-      await checkoutProduct(product, true, amount * 100); // Convert to cents
+      const credits = creditDetails.totalCredits;
+
+      await checkoutProduct(product, true, amount * 100, credits); // Convert to cents
     } catch (error) {
       console.error("Error during checkout:", error);
     }

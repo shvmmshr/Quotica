@@ -59,5 +59,7 @@ model Transaction {
   user      User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
   type      String   
   amount    Int
+  creds     Int
+  transactionNumber String
   createdAt DateTime @default(now())
 }

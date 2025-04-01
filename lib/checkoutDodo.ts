@@ -17,13 +17,14 @@ export const useCheckout = () => {
   const checkoutProduct = async (
     product: Product,
     useDynamicPaymentLinks: boolean,
-    amount: number = 200
+    amount: number | 200,
+    credits: number | 20
   ) => {
     if (useDynamicPaymentLinks) {
       const productType = "onetime";
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dodo/checkout/${productType}?productId=${product.product_id}&redirect_url=${product.redirectUrl}&userId=${product.userId}&email=${product.email}&fullName=${product.fullName}&amount=${amount}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/dodo/checkout/${productType}?productId=${product.product_id}&redirect_url=${product.redirectUrl}&userId=${product.userId}&email=${product.email}&fullName=${product.fullName}&amount=${amount}&credits=${credits}`,
         {
           cache: "no-store",
         }

@@ -47,6 +47,49 @@ export async function POST(request: Request) {
           console.log("-------PAYMENT DATA START ---------");
           console.log(paymentDataResp);
           console.log("-------PAYMENT DATA END ---------");
+          const metadata = paymentDataResp.metadata;
+          const userId = metadata.metadata_userId;
+          const creds = metadata.metadata_creds;
+          const transactionNumber = paymentDataResp.payment_id;
+          const amount = metadata.metadata_amount;
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/credits/addCreds`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId: userId,
+                creds: creds,
+              }),
+            }
+          );
+          const data = await response.json();
+          console.log("-------ADD CREDITS DATA START ---------");
+          console.log(data);
+          console.log("-------ADD CREDITS DATA END ---------");
+
+          const transaction = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/transactions`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userId: userId,
+                type: "credit",
+                amount: amount,
+                creds: creds,
+                transactionNumber: transactionNumber,
+              }),
+            }
+          );
+          const transactionData = await transaction.json();
+          console.log("-------ADD TRANSACTION DATA START ---------");
+          console.log(transactionData);
+          console.log("-------ADD TRANSACTION DATA END ---------");
 
           break;
         default:

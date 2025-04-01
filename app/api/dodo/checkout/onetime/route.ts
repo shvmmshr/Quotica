@@ -1,3 +1,4 @@
+import { metadata } from "@/app/layout";
 import { dodopayments } from "@/lib/dodoPayment";
 import { NextResponse } from "next/server";
 
@@ -10,10 +11,11 @@ export async function GET(request: Request) {
     const fullName = searchParams.get("fullName");
     const userId = searchParams.get("userId");
     const amount = searchParams.get("amount");
+    const credits = searchParams.get("credits");
     // console.log('productId:', productId);
     // console.log('redirectUrl:', redirectUrl);
 
-    if (!productId || !redirectUrl || !userId || !amount) {
+    if (!productId || !redirectUrl || !userId || !amount || !credits) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     const productWithQuantity = {
       product_id: productId,
       quantity: 1,
-      amount: amount ? Number(amount) : undefined,
+      amount: amount ? Number(amount) : 200,
     };
 
     const response = await dodopayments.payments.create({
@@ -43,6 +45,7 @@ export async function GET(request: Request) {
       return_url: redirectUrl,
       metadata: {
         metadata_userId: userId,
+        metadata_creds: credits,
         metadata_amount: amount,
       },
     });
