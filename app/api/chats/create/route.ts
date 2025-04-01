@@ -1,27 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 // Handler for creating or updating a chat session
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { method } = req;
-  const { sessionId, userId, message, title } = req.body; // Assume the request body has these fields
-
-  switch (method) {
-    case "POST":
-      return createOrUpdateChatSession(
-        req,
-        res,
-        sessionId,
-        userId,
-        message,
-        title
-      );
-    default:
-      res.status(405).json({ message: "Method Not Allowed" });
-  }
-}
 
 // Function to create or update a chat session
 async function createOrUpdateChatSession(
