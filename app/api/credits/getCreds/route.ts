@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
 
-  console.log("userId:", userId);
+  // console.log("userId:", userId);
 
   if (!userId) {
     return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });

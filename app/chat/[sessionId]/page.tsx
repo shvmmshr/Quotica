@@ -1,6 +1,6 @@
 // app/chat/page.tsx
 import { Metadata } from "next";
-import ChatLayout from "./_components/chatLayout";
+import ChatLayout from "./../_components/chatLayout";
 
 export const metadata: Metadata = {
   title: "Quotify Chat",
