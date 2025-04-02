@@ -15,8 +15,7 @@ interface ChatMainAreaProps {
 export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: ChatMainAreaProps) {
   const [messages, setMessages] = useState<Message[]>(currentChat?.messages || []);
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  console.log('currentChat', currentChat);
   useEffect(() => {
     if (currentChat) {
       setMessages(currentChat.messages);
@@ -27,8 +26,6 @@ export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: Ch
     if (!currentChat) return;
 
     const fetchMessages = async () => {
-      setLoading(true);
-      setError(null);
       try {
         const res = await fetch(
           `/api/chat/${currentChat.id}/messages?&clerkId=${currentChat.userId}`
@@ -38,10 +35,8 @@ export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: Ch
         const data: Message[] = await res.json();
         setMessages(data);
       } catch (err) {
-        setError('Failed to load messages');
         console.error('Error fetching messages:', err);
       } finally {
-        setLoading(false);
       }
     };
 
