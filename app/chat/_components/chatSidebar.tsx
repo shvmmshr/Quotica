@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Plus, MessageSquare, Pencil, Trash, Loader2 } from "lucide-react";
-import { ChatSession as Chat } from "./types";
+import { useState } from 'react';
+import { Plus, MessageSquare, Pencil, Trash, Loader2 } from 'lucide-react';
+import { ChatSession as Chat } from './types';
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -26,8 +26,8 @@ export default function ChatSidebar({
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
 
   const handleRename = (chat: Chat) => {
-    const newTitle = prompt("Enter new chat name:", chat.title);
-    if (newTitle && newTitle.trim() !== "" && newTitle !== chat.title) {
+    const newTitle = prompt('Enter new chat name:', chat.title);
+    if (newTitle && newTitle.trim() !== '' && newTitle !== chat.title) {
       onRenameChat(chat.id, newTitle.trim());
     }
   };
@@ -41,9 +41,7 @@ export default function ChatSidebar({
   return (
     <div
       className={`w-64 border-r overflow-y-auto h-full ${
-        theme === "dark"
-          ? "bg-gray-800 border-gray-700"
-          : "bg-white border-gray-200"
+        theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}
     >
       {/* New Chat Button */}
@@ -51,9 +49,9 @@ export default function ChatSidebar({
         <button
           onClick={onCreateNewChat}
           className={`w-full flex items-center justify-center gap-2 p-3 rounded-lg ${
-            theme === "dark"
-              ? "bg-gray-700 hover:bg-gray-600 text-white"
-              : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+            theme === 'dark'
+              ? 'bg-gray-700 hover:bg-gray-600 text-white'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
           }`}
         >
           <Plus size={16} />
@@ -65,7 +63,7 @@ export default function ChatSidebar({
       <div className="px-2">
         <h2
           className={`px-2 mb-2 text-sm font-medium ${
-            theme === "dark" ? "text-gray-400" : "text-gray-500"
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
           }`}
         >
           Recent Chats
@@ -80,7 +78,7 @@ export default function ChatSidebar({
         ) : chats.length === 0 ? (
           <div
             className={`p-4 text-center text-sm ${
-              theme === "dark" ? "text-gray-400" : "text-gray-500"
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
             }`}
           >
             No chats yet. Start a new conversation!
@@ -92,12 +90,12 @@ export default function ChatSidebar({
                 key={chat.id}
                 className={`p-2 rounded-lg flex items-center justify-between cursor-pointer text-sm ${
                   currentChat?.id === chat.id
-                    ? theme === "dark"
-                      ? "bg-gray-700 text-white"
-                      : "bg-gray-200 text-gray-900"
-                    : theme === "dark"
-                    ? "hover:bg-gray-700 text-gray-300"
-                    : "hover:bg-gray-100 text-gray-700"
+                    ? theme === 'dark'
+                      ? 'bg-gray-700 text-white'
+                      : 'bg-gray-200 text-gray-900'
+                    : theme === 'dark'
+                    ? 'hover:bg-gray-700 text-gray-300'
+                    : 'hover:bg-gray-100 text-gray-700'
                 }`}
               >
                 {/* Chat Name + Click to Select */}

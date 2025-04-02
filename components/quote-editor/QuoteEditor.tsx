@@ -1,30 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  QuoteDesign,
-  Quote,
-  QuoteStyle,
-  BackgroundStyle,
-  CanvasSize,
-} from "@/lib/types";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { QuoteDesign, Quote, QuoteStyle, BackgroundStyle, CanvasSize } from '@/lib/types';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { HexColorPicker } from "react-colorful";
-import { Download, Share2 } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { HexColorPicker } from 'react-colorful';
+// import { Download, Share2 } from "lucide-react";
+// import { toast } from 'sonner';
 
 interface QuoteEditorProps {
   design: QuoteDesign;
@@ -32,7 +26,7 @@ interface QuoteEditorProps {
 }
 
 export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
-  const [activeTab, setActiveTab] = useState("content");
+  const [activeTab, setActiveTab] = useState('content');
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
 
   const handleQuoteChange = (quote: Partial<Quote>) => {
@@ -71,43 +65,43 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
     });
   };
 
-  const downloadImage = () => {
-    // Implementation will be added later with html2canvas
-    toast.success("Image downloaded successfully");
-  };
+  // const downloadImage = () => {
+  //   // Implementation will be added later with html2canvas
+  //   toast.success('Image downloaded successfully');
+  // };
 
-  const shareImage = () => {
-    // Implementation will be added later
-    toast.success("Sharing link copied to clipboard");
-  };
+  // const shareImage = () => {
+  //   // Implementation will be added later
+  //   toast.success('Sharing link copied to clipboard');
+  // };
 
   const canvasSizes = [
-    { name: "Instagram Post", width: 1080, height: 1080, aspectRatio: "1:1" },
-    { name: "Instagram Story", width: 1080, height: 1920, aspectRatio: "9:16" },
-    { name: "Twitter Post", width: 1200, height: 675, aspectRatio: "16:9" },
-    { name: "Facebook Post", width: 1200, height: 630, aspectRatio: "1.91:1" },
-    { name: "Pinterest Pin", width: 1000, height: 1500, aspectRatio: "2:3" },
+    { name: 'Instagram Post', width: 1080, height: 1080, aspectRatio: '1:1' },
+    { name: 'Instagram Story', width: 1080, height: 1920, aspectRatio: '9:16' },
+    { name: 'Twitter Post', width: 1200, height: 675, aspectRatio: '16:9' },
+    { name: 'Facebook Post', width: 1200, height: 630, aspectRatio: '1.91:1' },
+    { name: 'Pinterest Pin', width: 1000, height: 1500, aspectRatio: '2:3' },
   ];
 
   const fontOptions = [
-    "Inter",
-    "Roboto",
-    "Montserrat",
-    "Playfair Display",
-    "Merriweather",
-    "Oswald",
-    "Lato",
-    "Open Sans",
-    "Poppins",
-    "Raleway",
+    'Inter',
+    'Roboto',
+    'Montserrat',
+    'Playfair Display',
+    'Merriweather',
+    'Oswald',
+    'Lato',
+    'Open Sans',
+    'Poppins',
+    'Raleway',
   ];
 
   const gradients = [
-    "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)",
-    "linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)",
-    "linear-gradient(135deg, #10B981 0%, #3B82F6 100%)",
-    "linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)",
-    "linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)",
+    'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+    'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)',
+    'linear-gradient(135deg, #10B981 0%, #3B82F6 100%)',
+    'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
+    'linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%)',
   ];
 
   return (
@@ -116,11 +110,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
         <CardTitle>Quote Editor</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="space-y-4"
-        >
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="style">Style</TabsTrigger>
@@ -143,7 +133,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
               <Input
                 id="author"
                 placeholder="Author name"
-                value={design.quote.author || ""}
+                value={design.quote.author || ''}
                 onChange={(e) => handleQuoteChange({ author: e.target.value })}
               />
             </div>
@@ -152,9 +142,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
               <Select
                 value={design.size.aspectRatio}
                 onValueChange={(value) => {
-                  const selectedSize = canvasSizes.find(
-                    (size) => size.aspectRatio === value
-                  );
+                  const selectedSize = canvasSizes.find((size) => size.aspectRatio === value);
                   if (selectedSize) {
                     handleSizeChange(selectedSize);
                   }
@@ -182,9 +170,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   max={100}
                   step={1}
                   value={[design.padding]}
-                  onValueChange={(values) =>
-                    onDesignChange({ padding: values[0] })
-                  }
+                  onValueChange={(values) => onDesignChange({ padding: values[0] })}
                 />
                 <span className="w-12 text-center">{design.padding}px</span>
               </div>
@@ -196,9 +182,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
               <Label htmlFor="font">Font</Label>
               <Select
                 value={design.quoteStyle.font}
-                onValueChange={(value) =>
-                  handleQuoteStyleChange({ font: value })
-                }
+                onValueChange={(value) => handleQuoteStyleChange({ font: value })}
               >
                 <SelectTrigger id="font">
                   <SelectValue placeholder="Select font" />
@@ -222,13 +206,9 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   max={72}
                   step={1}
                   value={[design.quoteStyle.fontSize]}
-                  onValueChange={(values) =>
-                    handleQuoteStyleChange({ fontSize: values[0] })
-                  }
+                  onValueChange={(values) => handleQuoteStyleChange({ fontSize: values[0] })}
                 />
-                <span className="w-12 text-center">
-                  {design.quoteStyle.fontSize}px
-                </span>
+                <span className="w-12 text-center">{design.quoteStyle.fontSize}px</span>
               </div>
             </div>
 
@@ -241,13 +221,9 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   max={3}
                   step={0.1}
                   value={[design.quoteStyle.lineHeight]}
-                  onValueChange={(values) =>
-                    handleQuoteStyleChange({ lineHeight: values[0] })
-                  }
+                  onValueChange={(values) => handleQuoteStyleChange({ lineHeight: values[0] })}
                 />
-                <span className="w-12 text-center">
-                  {design.quoteStyle.lineHeight.toFixed(1)}
-                </span>
+                <span className="w-12 text-center">{design.quoteStyle.lineHeight.toFixed(1)}</span>
               </div>
             </div>
 
@@ -257,7 +233,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                 value={design.quoteStyle.alignment}
                 onValueChange={(value) =>
                   handleQuoteStyleChange({
-                    alignment: value as "left" | "center" | "right",
+                    alignment: value as 'left' | 'center' | 'right',
                   })
                 }
               >
@@ -283,9 +259,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                 <Input
                   id="text-color"
                   value={design.quoteStyle.color}
-                  onChange={(e) =>
-                    handleQuoteStyleChange({ color: e.target.value })
-                  }
+                  onChange={(e) => handleQuoteStyleChange({ color: e.target.value })}
                 />
               </div>
               {colorPickerVisible && (
@@ -315,7 +289,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                 value={design.background.type}
                 onValueChange={(value) =>
                   handleBackgroundChange({
-                    type: value as "color" | "gradient" | "image",
+                    type: value as 'color' | 'gradient' | 'image',
                   })
                 }
               >
@@ -330,7 +304,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
               </Select>
             </div>
 
-            {design.background.type === "color" && (
+            {design.background.type === 'color' && (
               <div className="space-y-2">
                 <Label htmlFor="background-color">Background Color</Label>
                 <div className="flex items-center space-x-2">
@@ -342,18 +316,14 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   <Input
                     id="background-color"
                     value={design.background.value}
-                    onChange={(e) =>
-                      handleBackgroundChange({ value: e.target.value })
-                    }
+                    onChange={(e) => handleBackgroundChange({ value: e.target.value })}
                   />
                 </div>
                 {colorPickerVisible && (
                   <div className="absolute z-10 mt-2">
                     <HexColorPicker
                       color={design.background.value}
-                      onChange={(color) =>
-                        handleBackgroundChange({ value: color })
-                      }
+                      onChange={(color) => handleBackgroundChange({ value: color })}
                     />
                     <div className="flex justify-end mt-2">
                       <Button
@@ -369,7 +339,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
               </div>
             )}
 
-            {design.background.type === "gradient" && (
+            {design.background.type === 'gradient' && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Gradient Presets</Label>
@@ -379,9 +349,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                         key={index}
                         className="w-full h-12 rounded-md cursor-pointer border"
                         style={{ background: gradient }}
-                        onClick={() =>
-                          handleBackgroundChange({ value: gradient })
-                        }
+                        onClick={() => handleBackgroundChange({ value: gradient })}
                       />
                     ))}
                   </div>
@@ -391,24 +359,20 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   <Input
                     id="custom-gradient"
                     value={design.background.value}
-                    onChange={(e) =>
-                      handleBackgroundChange({ value: e.target.value })
-                    }
+                    onChange={(e) => handleBackgroundChange({ value: e.target.value })}
                     placeholder="linear-gradient(...)"
                   />
                 </div>
               </div>
             )}
 
-            {design.background.type === "image" && (
+            {design.background.type === 'image' && (
               <div className="space-y-2">
                 <Label htmlFor="image-url">Image URL</Label>
                 <Input
                   id="image-url"
                   value={design.background.value}
-                  onChange={(e) =>
-                    handleBackgroundChange({ value: e.target.value })
-                  }
+                  onChange={(e) => handleBackgroundChange({ value: e.target.value })}
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -423,9 +387,7 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   max={1}
                   step={0.05}
                   value={[design.background.opacity || 1]}
-                  onValueChange={(values) =>
-                    handleBackgroundChange({ opacity: values[0] })
-                  }
+                  onValueChange={(values) => handleBackgroundChange({ opacity: values[0] })}
                 />
                 <span className="w-12 text-center">
                   {(design.background.opacity || 1).toFixed(2)}
@@ -442,13 +404,9 @@ export function QuoteEditor({ design, onDesignChange }: QuoteEditorProps) {
                   max={20}
                   step={1}
                   value={[design.background.blur || 0]}
-                  onValueChange={(values) =>
-                    handleBackgroundChange({ blur: values[0] })
-                  }
+                  onValueChange={(values) => handleBackgroundChange({ blur: values[0] })}
                 />
-                <span className="w-12 text-center">
-                  {design.background.blur || 0}px
-                </span>
+                <span className="w-12 text-center">{design.background.blur || 0}px</span>
               </div>
             </div>
           </TabsContent>

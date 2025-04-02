@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   SignedIn,
   SignedOut,
@@ -6,28 +6,36 @@ import {
   SignUpButton,
   UserButton,
   useUser,
-} from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Pacifico } from "next/font/google";
-import { useEffect, useState } from "react";
-import { CreditCard, Clock } from "lucide-react"; // Import Clock icon
-import { useTheme } from "next-themes";
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+} from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Pacifico } from 'next/font/google';
+import { useEffect, useState } from 'react';
+import { CreditCard, Clock } from 'lucide-react'; // Import Clock icon
+import { useTheme } from 'next-themes';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const pacifico = Pacifico({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
 });
+
+interface Transaction {
+  id: string;
+  type: 'credit' | 'debit';
+  creds: number;
+  amount: number;
+  createdAt: string;
+}
 
 export default function Header() {
   const { theme } = useTheme();
   const { user } = useUser();
   const [credits, setCredits] = useState<number>(0);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isOpen, setIsOpen] = useState(false); // Modal state
 
   useEffect(() => {
@@ -38,7 +46,7 @@ export default function Header() {
           const data = await res.json();
           setCredits(data.credits ?? 0);
         } catch (error) {
-          console.error("Failed to fetch credits", error);
+          console.error('Failed to fetch credits', error);
         }
       }
     };
@@ -55,7 +63,7 @@ export default function Header() {
         setTransactions(data.transactions ?? []);
         setIsOpen(true); // Open modal
       } catch (error) {
-        console.error("Failed to fetch transactions", error);
+        console.error('Failed to fetch transactions', error);
       }
     }
   };
@@ -66,9 +74,7 @@ export default function Header() {
         <div className="container mx-auto flex items-center justify-between h-16 px-4 py-4 md:px-6 max-w-7xl">
           <div className="flex items-center gap-2">
             <Link href="/">
-              <span className={`text-2xl ${pacifico.className} text-primary`}>
-                Quotica
-              </span>
+              <span className={`text-2xl ${pacifico.className} text-primary`}>Quotica</span>
             </Link>
           </div>
           <nav className="flex items-center gap-4">
@@ -76,13 +82,13 @@ export default function Header() {
               <div className="flex items-center gap-4">
                 <div
                   className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-                    theme === "dark" ? "bg-gray-800" : "bg-white border"
+                    theme === 'dark' ? 'bg-gray-800' : 'bg-white border'
                   }`}
                 >
                   <span className="text-sm font-medium">Credits:</span>
                   <span
                     className={`text-sm font-bold ${
-                      credits < 1 ? "text-red-500" : "text-green-500"
+                      credits < 1 ? 'text-red-500' : 'text-green-500'
                     }`}
                   >
                     {credits.toFixed(2)}
@@ -100,9 +106,9 @@ export default function Header() {
                 <Link href="/membership">
                   <button
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-md ${
-                      theme === "dark"
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-blue-500 hover:bg-blue-600"
+                      theme === 'dark'
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-blue-500 hover:bg-blue-600'
                     } text-white`}
                   >
                     <CreditCard size={16} />
@@ -142,11 +148,7 @@ export default function Header() {
 
       {/* Transaction Modal */}
       <Transition show={isOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="fixed inset-0 z-[100]"
-          onClose={() => setIsOpen(false)}
-        >
+        <Dialog as="div" className="fixed inset-0 z-[100]" onClose={() => setIsOpen(false)}>
           {/* Background Blur Effect */}
           <div className="fixed inset-0 bg-gray-900 bg-opacity-20 backdrop-blur-lg" />
 
@@ -173,11 +175,10 @@ export default function Header() {
                         className="flex justify-between p-2 border-b dark:border-gray-700"
                       >
                         <span className="text-sm">
-                          {txn.type === "credit" ? "Added" : "Used"} {txn.creds}{" "}
-                          credits
-                          {" ($"}
+                          {txn.type === 'credit' ? 'Added' : 'Used'} {txn.creds} credits
+                          {' ($'}
                           {(txn.amount / 100).toFixed(2)}
-                          {")"}
+                          {')'}
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(txn.createdAt).toLocaleString()}
@@ -185,9 +186,7 @@ export default function Header() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">
-                      No transactions found.
-                    </p>
+                    <p className="text-sm text-gray-500">No transactions found.</p>
                   )}
                 </div>
 

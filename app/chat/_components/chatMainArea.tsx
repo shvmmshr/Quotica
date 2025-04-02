@@ -1,28 +1,21 @@
-"use client";
-import { useEffect, useState } from "react";
-import { MessageSquare } from "lucide-react";
-import ChatHeader from "./chatHeader";
-import MessagesList from "./messagesList";
-import MessageInput from "./messageInput";
-import { ChatSession as Chat, Message } from "./types";
-import { v4 as uuid } from "uuid";
+'use client';
+import { useEffect, useState } from 'react';
+import { MessageSquare } from 'lucide-react';
+import ChatHeader from './chatHeader';
+import MessagesList from './messagesList';
+import MessageInput from './messageInput';
+import { ChatSession as Chat, Message } from './types';
+import { v4 as uuid } from 'uuid';
 interface ChatMainAreaProps {
   currentChat: Chat | null;
   onCreateNewChat: () => void;
   theme: string | undefined;
 }
 
-export default function ChatMainArea({
-  currentChat,
-  onCreateNewChat,
-  theme,
-}: ChatMainAreaProps) {
-  const [messages, setMessages] = useState<Message[]>(
-    currentChat?.messages || []
-  );
+export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: ChatMainAreaProps) {
+  const [messages, setMessages] = useState<Message[]>(currentChat?.messages || []);
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  console.log('currentChat', currentChat);
   useEffect(() => {
     if (currentChat) {
       setMessages(currentChat.messages);
@@ -33,21 +26,17 @@ export default function ChatMainArea({
     if (!currentChat) return;
 
     const fetchMessages = async () => {
-      setLoading(true);
-      setError(null);
       try {
         const res = await fetch(
           `/api/chat/${currentChat.id}/messages?&clerkId=${currentChat.userId}`
         );
-        if (!res.ok) throw new Error("Failed to fetch messages");
+        if (!res.ok) throw new Error('Failed to fetch messages');
 
         const data: Message[] = await res.json();
         setMessages(data);
       } catch (err) {
-        setError("Failed to load messages");
-        console.error("Error fetching messages:", err);
+        console.error('Error fetching messages:', err);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -55,7 +44,7 @@ export default function ChatMainArea({
   }, [currentChat]); // Run when currentChat changes
 
   const clerkId = currentChat?.userId;
-  console.log("clerkId", clerkId);
+  console.log('clerkId', clerkId);
   const handleSendMessage = async (content: string) => {
     if (!content.trim() || !currentChat) return;
 
@@ -64,7 +53,7 @@ export default function ChatMainArea({
       id: `temp-${uuid()}`, // Temporary ID
       chatSessionId: currentChat.id,
       content,
-      role: "user",
+      role: 'user',
       createdAt: new Date().toISOString(),
     };
 
@@ -73,29 +62,25 @@ export default function ChatMainArea({
 
     try {
       const res = await fetch(`/api/chat/${currentChat.id}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clerkId: currentChat.userId, content }),
       });
 
-      if (!res.ok) throw new Error("Failed to send message");
+      if (!res.ok) throw new Error('Failed to send message');
 
       const newMessages: Message[] = await res.json();
 
       // Replace temp message with actual messages from API
       setMessages((prevMessages) =>
-        prevMessages
-          .filter((msg) => msg.id !== tempMessage.id)
-          .concat(newMessages)
+        prevMessages.filter((msg) => msg.id !== tempMessage.id).concat(newMessages)
       );
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
 
       // Optionally show error UI (e.g., mark message as failed)
       setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === tempMessage.id ? { ...msg, error: true } : msg
-        )
+        prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
       );
     }
   };
@@ -127,19 +112,15 @@ function EmptyState({
       <div className="text-center max-w-md p-8">
         <MessageSquare size={48} className="mx-auto mb-4 opacity-30" />
         <h3 className="text-xl font-medium mb-2">Welcome to Quotify Chat</h3>
-        <p
-          className={`mb-4 ${
-            theme === "dark" ? "text-gray-400" : "text-gray-500"
-          }`}
-        >
+        <p className={`mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
           Start a new chat or select an existing chat from the sidebar.
         </p>
         <button
           onClick={onCreateNewChat}
           className={`px-4 py-2 rounded-lg ${
-            theme === "dark"
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
+            theme === 'dark'
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
           }`}
         >
           Start New Chat
