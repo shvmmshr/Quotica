@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
+    "dev:local": "NEXT_PUBLIC_API_URL=http://localhost:8082 next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -40,7 +41,6 @@
     "dotenv": "^16.4.7",
     "framer-motion": "^12.5.0",
     "html2canvas": "^1.4.1",
-    "husky": "^9.1.7",
     "langchain": "^0.3.19",
     "lenis": "^1.2.3",
     "lint-staged": "^15.5.0",
@@ -66,6 +66,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.17.27",
@@ -73,6 +75,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.2.3",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
@@ -80,6 +83,18 @@
     "**/*.{js,ts,tsx,jsx,json,md,css}": [
       "prettier --write",
       "eslint --fix"
+    ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "@heroui/shared-utils",
+      "@prisma/client",
+      "@prisma/engines",
+      "@vercel/speed-insights",
+      "esbuild",
+      "prisma",
+      "sharp"
     ]
   }
 }
