@@ -1,140 +1,137 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "next-themes";
-import Lenis from "lenis";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { Button } from "./ui/button";
-import { ArrowRight } from "lucide-react";
+import React, { useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { useTheme } from 'next-themes';
+import Lenis from 'lenis';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { Button } from './ui/button';
+import { ArrowRight } from 'lucide-react';
 
 // Component for a single shooting star
-interface ShootingStarProps {
-  delay: number;
-  top: number;
-  left: number;
-  size: number;
-  rotation: number;
-  speed: number;
-  trail: number;
-  color: string;
-}
+// interface ShootingStarProps {
+//   delay: number;
+//   top: number;
+//   left: number;
+//   size: number;
+//   rotation: number;
+//   speed: number;
+//   trail: number;
+//   color: string;
+// }
 
-const ShootingStar = ({
-  delay = 0,
-  top,
-  left,
-  size,
-  rotation,
-  speed = 1.8,
-  trail,
-  color = "white",
-}: ShootingStarProps) => {
-  // Calculate trail effect
-  const trailOpacity = 0.8 - size * 0.1; // Smaller stars have more visible trails
-  const glowSize = size * 2.5;
+// const ShootingStar = ({
+//   delay = 0,
+//   top,
+//   left,
+//   size,
+//   rotation,
+//   speed = 1.8,
+//   trail,
+//   color = 'white',
+// }: ShootingStarProps) => {
+//   // Calculate trail effect
+//   const trailOpacity = 0.8 - size * 0.1; // Smaller stars have more visible trails
+//   const glowSize = size * 2.5;
 
-  return (
-    <motion.div
-      className="absolute z-0"
-      style={{
-        top: `${top}%`,
-        left: `${left}%`,
-        transform: `rotate(${rotation}deg)`,
-      }}
-      initial={{
-        opacity: 0,
-      }}
-      animate={{
-        opacity: [0, 1, 0.8, 0],
-      }}
-      transition={{
-        duration: speed,
-        delay,
-        ease: "easeInOut",
-      }}
-    >
-      {/* Star head */}
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: color,
-          boxShadow: `0 0 ${glowSize}px ${glowSize / 2}px rgba(255,255,255,${
-            trailOpacity + 0.2
-          })`,
-          zIndex: 2,
-        }}
-        initial={{
-          x: 0,
-          y: 0,
-        }}
-        animate={{
-          x: trail,
-          y: trail,
-        }}
-        transition={{
-          duration: speed,
-          delay,
-          ease: [0.2, 0.2, 0.3, 1], // Custom cubic bezier for more realistic motion
-        }}
-      />
+//   return (
+//     <motion.div
+//       className="absolute z-0"
+//       style={{
+//         top: `${top}%`,
+//         left: `${left}%`,
+//         transform: `rotate(${rotation}deg)`,
+//       }}
+//       initial={{
+//         opacity: 0,
+//       }}
+//       animate={{
+//         opacity: [0, 1, 0.8, 0],
+//       }}
+//       transition={{
+//         duration: speed,
+//         delay,
+//         ease: 'easeInOut',
+//       }}
+//     >
+//       {/* Star head */}
+//       <motion.div
+//         className="absolute rounded-full"
+//         style={{
+//           width: `${size}px`,
+//           height: `${size}px`,
+//           backgroundColor: color,
+//           boxShadow: `0 0 ${glowSize}px ${glowSize / 2}px rgba(255,255,255,${trailOpacity + 0.2})`,
+//           zIndex: 2,
+//         }}
+//         initial={{
+//           x: 0,
+//           y: 0,
+//         }}
+//         animate={{
+//           x: trail,
+//           y: trail,
+//         }}
+//         transition={{
+//           duration: speed,
+//           delay,
+//           ease: [0.2, 0.2, 0.3, 1], // Custom cubic bezier for more realistic motion
+//         }}
+//       />
 
-      {/* Star trail */}
-      <motion.div
-        className="absolute origin-top-left"
-        style={{
-          width: `${trail}px`,
-          height: `${size / 1.2}px`,
-          background: `linear-gradient(to right, transparent, ${color}40 30%, ${color}80)`,
-          filter: "blur(0.8px)",
-        }}
-        initial={{
-          scaleX: 0,
-          opacity: 0,
-        }}
-        animate={{
-          scaleX: 1,
-          opacity: [0, trailOpacity, 0],
-        }}
-        transition={{
-          duration: speed,
-          delay,
-          ease: [0.2, 0.2, 0.3, 1],
-        }}
-      />
-    </motion.div>
-  );
-};
+//       {/* Star trail */}
+//       <motion.div
+//         className="absolute origin-top-left"
+//         style={{
+//           width: `${trail}px`,
+//           height: `${size / 1.2}px`,
+//           background: `linear-gradient(to right, transparent, ${color}40 30%, ${color}80)`,
+//           filter: 'blur(0.8px)',
+//         }}
+//         initial={{
+//           scaleX: 0,
+//           opacity: 0,
+//         }}
+//         animate={{
+//           scaleX: 1,
+//           opacity: [0, trailOpacity, 0],
+//         }}
+//         transition={{
+//           duration: speed,
+//           delay,
+//           ease: [0.2, 0.2, 0.3, 1],
+//         }}
+//       />
+//     </motion.div>
+//   );
+// };
 
 const HeroSection: React.FC = () => {
   const { theme } = useTheme();
-  const [stars, setStars] = useState<
-    {
-      id: number;
-      delay: number;
-      top: number;
-      left: number;
-      size: number;
-      rotation: number;
-      speed: number;
-      trail: number;
-      color: string;
-    }[]
-  >([]);
+  // const [stars, setStars] = useState<
+  //   {
+  //     id: number;
+  //     delay: number;
+  //     top: number;
+  //     left: number;
+  //     size: number;
+  //     rotation: number;
+  //     speed: number;
+  //     trail: number;
+  //     color: string;
+  //   }[]
+  // >([]);
 
   // Setup shooting stars that appear more frequently with better distribution
   useEffect(() => {
-    let count = 0;
     let timerId: NodeJS.Timeout;
     let activeShoots = 0;
     const maxConcurrentStars = 3; // Allow up to 3 stars at once
 
     // Star colors
-    const starColors = ["#ffffff", "#f5f5ff", "#ebebff", "#e6f7ff", "#fff5f0"];
+    // const starColors = ['#ffffff', '#f5f5ff', '#ebebff', '#e6f7ff', '#fff5f0'];
 
     const createStar = () => {
       // Limit concurrent stars
@@ -145,30 +142,33 @@ const HeroSection: React.FC = () => {
 
       activeShoots++;
 
-      // Create star with better parameters
-      const speed = 1.4 + Math.random() * 1.2; // Speed between 1.4-2.6
-      const size = 1.5 + Math.random() * 3; // Size between 1.5-4.5px
-      const trail = 150 + Math.random() * 100; // Trail between 150-250px
+      // // Create star with better parameters
+      // const speed = 1.4 + Math.random() * 1.2; // Speed between 1.4-2.6
+      // const size = 1.5 + Math.random() * 3; // Size between 1.5-4.5px
+      // const trail = 150 + Math.random() * 100; // Trail between 150-250px
 
-      const newStar = {
-        id: count++,
-        delay: 0,
-        top: Math.random() * 70, // Random vertical position in top 70%
-        left: Math.random() * 40, // Wider horizontal distribution
-        size,
-        rotation: 25 + Math.random() * 35, // More varied rotation between 25-60 degrees
-        speed,
-        trail,
-        color: starColors[Math.floor(Math.random() * starColors.length)],
-      };
+      // const newStar = {
+      //   id: count++,
+      //   delay: 0,
+      //   top: Math.random() * 70, // Random vertical position in top 70%
+      //   left: Math.random() * 40, // Wider horizontal distribution
+      //   size,
+      //   rotation: 25 + Math.random() * 35, // More varied rotation between 25-60 degrees
+      //   speed,
+      //   trail,
+      //   color: starColors[Math.floor(Math.random() * starColors.length)],
+      // };
 
-      setStars((prev) => [...prev, newStar]);
+      // setStars((prev) => [...prev, newStar]);
 
-      // Remove star after animation completes + buffer
-      setTimeout(() => {
-        setStars((prev) => prev.filter((star) => star.id !== newStar.id));
-        activeShoots--;
-      }, (speed + 0.5) * 1000);
+      // // Remove star after animation completes + buffer
+      // setTimeout(
+      //   () => {
+      //     setStars((prev) => prev.filter((star) => star.id !== newStar.id));
+      //     activeShoots--;
+      //   },
+      //   (speed + 0.5) * 1000
+      // );
 
       // Schedule next star with more varied timing
       const nextStarDelay = 800 + Math.random() * 1200; // Between 0.8-2 seconds
@@ -195,7 +195,7 @@ const HeroSection: React.FC = () => {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
+      orientation: 'vertical',
     });
 
     function raf(time: number) {
@@ -238,7 +238,7 @@ const HeroSection: React.FC = () => {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut",
+        ease: 'easeOut',
       },
     },
   };
@@ -246,9 +246,7 @@ const HeroSection: React.FC = () => {
   return (
     <section
       className={`relative ${
-        theme === "dark"
-          ? "bg-background text-foreground"
-          : "bg-background text-foreground"
+        theme === 'dark' ? 'bg-background text-foreground' : 'bg-background text-foreground'
       } min-h-screen flex flex-col items-center justify-center w-full overflow-hidden`}
     >
       {/* Subtle background elements with animation */}
@@ -258,7 +256,7 @@ const HeroSection: React.FC = () => {
 
         <motion.div
           className={`absolute top-20 left-10 w-64 h-64 rounded-full ${
-            theme === "dark" ? "bg-primary/20" : "bg-primary/10"
+            theme === 'dark' ? 'bg-primary/20' : 'bg-primary/10'
           } opacity-30 blur-3xl`}
           animate={{
             x: [0, 20, 0],
@@ -267,12 +265,12 @@ const HeroSection: React.FC = () => {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
         <motion.div
           className={`absolute bottom-40 right-20 w-96 h-96 rounded-full ${
-            theme === "dark" ? "bg-primary/20" : "bg-primary/10"
+            theme === 'dark' ? 'bg-primary/20' : 'bg-primary/10'
           } opacity-40 blur-3xl`}
           animate={{
             x: [0, -30, 0],
@@ -281,7 +279,7 @@ const HeroSection: React.FC = () => {
           transition={{
             duration: 10,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
       </div>
@@ -298,16 +296,14 @@ const HeroSection: React.FC = () => {
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight leading-tight"
             variants={fadeIn}
           >
-            Transform your thoughts into{" "}
-            <span className="text-purple-500">beautiful quotes</span>
+            Transform your thoughts into <span className="text-purple-500">beautiful quotes</span>
           </motion.h1>
           <motion.p
             className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10"
             variants={fadeIn}
           >
-            Create stunning, shareable quote images with Quotica. Customize
-            fonts, colors, backgrounds, and leverage AI-powered design
-            suggestions.
+            Create stunning, shareable quote images with Quotica. Customize fonts, colors,
+            backgrounds, and leverage AI-powered design suggestions.
           </motion.p>
 
           <SignedIn>
@@ -366,11 +362,7 @@ const HeroSection: React.FC = () => {
             </motion.div>
           </SignedIn>
           <SignedOut>
-            <SignInButton
-              fallbackRedirectUrl="/"
-              signUpFallbackRedirectUrl="/"
-              mode="modal"
-            >
+            <SignInButton fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/" mode="modal">
               <Button
                 size="lg"
                 className="group relative h-12 overflow-hidden rounded-full bg-purple-600 px-8 font-medium text-white transition-all hover:bg-purple-700 hover:shadow-lg"
@@ -396,7 +388,7 @@ const HeroSection: React.FC = () => {
             className="relative bg-card p-6 rounded-xl shadow-xl"
             whileHover={{
               y: -5,
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             }}
             transition={{ duration: 0.4 }}
           >
@@ -460,8 +452,8 @@ const HeroSection: React.FC = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">Customizable Design</h3>
             <p className="text-muted-foreground">
-              Choose from a variety of fonts, colors, and backgrounds to create
-              the perfect quote image that matches your style.
+              Choose from a variety of fonts, colors, and backgrounds to create the perfect quote
+              image that matches your style.
             </p>
           </motion.div>
 
@@ -489,12 +481,10 @@ const HeroSection: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">
-              AI-Powered Suggestions
-            </h3>
+            <h3 className="text-xl font-semibold mb-2">AI-Powered Suggestions</h3>
             <p className="text-muted-foreground">
-              Get intelligent design recommendations for backgrounds, color
-              palettes, and font pairings based on your quote.
+              Get intelligent design recommendations for backgrounds, color palettes, and font
+              pairings based on your quote.
             </p>
           </motion.div>
 
@@ -524,8 +514,8 @@ const HeroSection: React.FC = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">Export Options</h3>
             <p className="text-muted-foreground">
-              Download your quotes as high-quality images or share them directly
-              to your social media platforms.
+              Download your quotes as high-quality images or share them directly to your social
+              media platforms.
             </p>
           </motion.div>
         </motion.div>

@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -25,9 +25,7 @@ export default function ContactUs() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -39,7 +37,7 @@ export default function ContactUs() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError("");
+    setError('');
 
     try {
       // In a real implementation, this would be an API call
@@ -47,13 +45,13 @@ export default function ContactUs() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsSubmitted(true);
       setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
       });
     } catch (err) {
-      setError("Something went wrong. Please try again later.");
+      setError(`Something went wrong. Please try again later.${err}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -61,16 +59,11 @@ export default function ContactUs() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        className="space-y-8"
-      >
+      <motion.div initial="hidden" animate="visible" variants={fadeIn} className="space-y-8">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl text-muted-foreground">
-            Have questions or feedback? We'd love to hear from you.
+            Have questions or feedback? We&apos;d love to hear from you.
           </p>
         </div>
 
@@ -79,8 +72,8 @@ export default function ContactUs() {
             <div>
               <h2 className="text-2xl font-semibold mb-4">Get in Touch</h2>
               <p className="text-muted-foreground">
-                We're here to help and answer any questions you might have. We
-                look forward to hearing from you.
+                We&apos;re here to help and answer any questions you might have. We look forward to
+                hearing from you.
               </p>
             </div>
 
@@ -106,15 +99,12 @@ export default function ContactUs() {
                 <div>
                   <h3 className="font-medium">Email</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    <a
-                      href="mailto:support@quotica.app"
-                      className="text-primary hover:underline"
-                    >
+                    <a href="mailto:support@quotica.app" className="text-primary hover:underline">
                       support@quotica.app
                     </a>
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    We'll respond as soon as possible
+                    We&apos;ll respond as soon as possible
                   </p>
                 </div>
               </div>
@@ -175,8 +165,7 @@ export default function ContactUs() {
                 </div>
                 <h3 className="text-xl font-medium mb-2">Message Sent!</h3>
                 <p className="text-muted-foreground mb-4">
-                  Thank you for reaching out. We'll get back to you as soon as
-                  possible.
+                  Thank you for reaching out. We&aposll get back to you as soon as possible.
                 </p>
                 <button
                   onClick={() => setIsSubmitted(false)}
@@ -188,10 +177,7 @@ export default function ContactUs() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="name" className="block text-sm font-medium mb-1">
                     Your Name
                   </label>
                   <input
@@ -207,10 +193,7 @@ export default function ContactUs() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="email" className="block text-sm font-medium mb-1">
                     Email Address
                   </label>
                   <input
@@ -226,10 +209,7 @@ export default function ContactUs() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="subject" className="block text-sm font-medium mb-1">
                     Subject
                   </label>
                   <select
@@ -250,10 +230,7 @@ export default function ContactUs() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="message" className="block text-sm font-medium mb-1">
                     Message
                   </label>
                   <textarea
@@ -304,7 +281,7 @@ export default function ContactUs() {
                       Sending...
                     </>
                   ) : (
-                    "Send Message"
+                    'Send Message'
                   )}
                 </button>
               </form>
