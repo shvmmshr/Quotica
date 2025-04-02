@@ -1,18 +1,22 @@
-export type Message = {
+export interface ChatSession {
   id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  timestamp: string;
-  imageUrl?: string;
-};
-
-export type Chat = {
-  id: string;
+  userId: string;
   title: string;
-  messages: Message[];
   createdAt: string;
   updatedAt: string;
-};
+  messages: Message[];
+}
+
+export interface Message {
+  id: string;
+  chatSessionId: string;
+  content: string;
+  role: "user" | "assistant" | "system";
+  createdAt: string;
+  error?: boolean; // Optional error flag for failed messages
+}
+
+export type ChatRole = "user" | "assistant" | "system";
 
 export type UserCredits = {
   total: number;

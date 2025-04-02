@@ -1,22 +1,42 @@
 "use client";
-import React, { useState } from "react";
-import { Send } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { SendHorizonal } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface MessageInputProps {
-  theme: string | undefined;
   onSendMessage: (text: string) => void;
 }
 
-export default function MessageInput({
-  theme,
-  onSendMessage,
-}: MessageInputProps) {
+export default function MessageInput({ onSendMessage }: MessageInputProps) {
   const [message, setMessage] = useState("");
+  const [rows, setRows] = useState(1);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (!textareaRef.current) return;
+
+    // Reset height to auto to get the correct scrollHeight
+    textareaRef.current.style.height = "auto";
+
+    // Calculate new height based on scrollHeight (with max-height constraint)
+    const newHeight = Math.min(textareaRef.current.scrollHeight, 150);
+    textareaRef.current.style.height = `${newHeight}px`;
+
+    // Set rows for styling/spacing
+    setRows(message.split("\n").length);
+  }, [message]);
 
   const sendMessage = () => {
     if (!message.trim()) return;
     onSendMessage(message);
     setMessage("");
+
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -27,41 +47,27 @@ export default function MessageInput({
   };
 
   return (
-    <div
-      className={`p-4 border-t ${
-        theme === "dark" ? "border-gray-700" : "border-gray-200"
-      } sticky bottom-0 z-10 bg-inherit`}
-    >
-      <div className="flex items-end rounded-lg gap-2 max-w-3xl mx-auto">
-        <div className="flex-1 relative">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Message Quotify..."
-            rows={1}
-            className={`w-full p-3 rounded-lg resize-none ${
-              theme === "dark"
-                ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500"
-                : "bg-white border border-gray-300 focus:border-blue-400"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
-        </div>
-        <button
+    <div className="sticky bottom-0 z-10 border-t border-border/30 px-4 py-3 bg-card/30 backdrop-blur-sm">
+      <div className="max-w-3xl mx-auto flex items-end gap-2">
+        <Textarea
+          ref={textareaRef}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask about generating a quote image..."
+          rows={rows}
+          className="min-h-[44px] max-h-[150px] resize-none rounded-xl border border-border/60 bg-background shadow-sm focus-visible:ring-1 focus-visible:ring-primary"
+        />
+
+        <Button
           onClick={sendMessage}
           disabled={!message.trim()}
-          className={`p-3 rounded-lg ${
-            !message.trim()
-              ? theme === "dark"
-                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : theme === "dark"
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
-          }`}
+          size="icon"
+          className="shrink-0 rounded-full h-11 w-11 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
-          <Send size={18} />
-        </button>
+          <SendHorizonal size={18} />
+          <span className="sr-only">Send message</span>
+        </Button>
       </div>
     </div>
   );

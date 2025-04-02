@@ -1,31 +1,66 @@
-import { Message } from "./types";
+"use client";
+
+import { cn } from "@/lib/utils";
+import { Message } from "../types";
+import { useTheme } from "next-themes";
+import { User, Bot } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface ChatMessageProps {
   message: Message;
-  theme: string | undefined;
 }
 
-export default function ChatMessage({ message, theme }: ChatMessageProps) {
+export default function ChatMessage({ message }: ChatMessageProps) {
+  const isUser = message.role === "user";
+  const hasError = "error" in message && message.error;
+
   return (
     <div
-      className={`flex ${
-        message.role === "user" ? "justify-end" : "justify-start"
-      }`}
+      className={cn(
+        "flex w-full gap-2",
+        isUser ? "justify-end" : "justify-start"
+      )}
     >
+      {!isUser && (
+        <Avatar className="h-8 w-8 rounded-full bg-primary/10">
+          <AvatarFallback className="text-primary">
+            <Bot size={16} />
+          </AvatarFallback>
+        </Avatar>
+      )}
+
       <div
-        className={`max-w-[80%] rounded-lg p-3 ${
-          message.role === "user"
-            ? "bg-blue-500 text-white"
-            : theme === "dark"
-            ? "bg-gray-700 text-gray-200"
-            : "bg-gray-200 text-gray-800"
-        }`}
+        className={cn(
+          "max-w-[85%] rounded-2xl px-4 py-3",
+          isUser ? "bg-primary text-primary-foreground" : "bg-muted",
+          hasError && "bg-destructive/10 text-destructive dark:text-red-300"
+        )}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
-        <span className="block text-xs mt-1 opacity-50">
-          {new Date(message.createdAt).toLocaleTimeString()}
-        </span>
+        <div className="whitespace-pre-wrap break-words text-sm">
+          {message.content}
+          {hasError && (
+            <div className="mt-2 text-xs font-medium">
+              Error sending message. Please try again.
+            </div>
+          )}
+        </div>
+        <div className="mt-1 flex justify-end">
+          <span className="text-[10px] opacity-50">
+            {new Date(message.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        </div>
       </div>
+
+      {isUser && (
+        <Avatar className="h-8 w-8 rounded-full bg-primary/10">
+          <AvatarFallback className="text-primary">
+            <User size={16} />
+          </AvatarFallback>
+        </Avatar>
+      )}
     </div>
   );
 }
