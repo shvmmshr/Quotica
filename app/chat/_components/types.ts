@@ -1,7 +1,7 @@
 export interface Message {
   id: string;
   chatSessionId: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
   createdAt: string;
 }

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.12.9",
@@ -37,14 +40,17 @@
     "dotenv": "^16.4.7",
     "framer-motion": "^12.5.0",
     "html2canvas": "^1.4.1",
+    "husky": "^9.1.7",
     "langchain": "^0.3.19",
     "lenis": "^1.2.3",
+    "lint-staged": "^15.5.0",
     "lucide-react": "^0.483.0",
     "mime-types": "^2.1.35",
     "mongodb": "^6.15.0",
     "next": "15.2.3",
     "next-themes": "^0.4.6",
     "openai": "^4.89.0",
+    "prettier": "^3.5.3",
     "prisma": "^6.5.0",
     "react": "^19.0.0",
     "react-colorful": "^5.6.1",
@@ -65,9 +71,15 @@
     "@types/node": "^20.17.27",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "^9.23.0",
     "eslint-config-next": "15.2.3",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,tsx,jsx,json,md,css}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }
