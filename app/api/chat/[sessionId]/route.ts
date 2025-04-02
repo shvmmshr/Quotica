@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma"; // Adjust the import path as necessary
 // Fetch a specific chat session by sessionId
 export async function GET(
   req: Request,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const { sessionId } = await params;
 
@@ -40,7 +40,7 @@ export async function GET(
 // Delete a chat session by sessionId
 export async function DELETE(
   req: Request,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const { sessionId } = await params;
 
@@ -69,7 +69,7 @@ export async function DELETE(
 // Update a chat session title by sessionId
 export async function PATCH(
   req: Request,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const { sessionId } = await params;
   const { title } = await req.json();
