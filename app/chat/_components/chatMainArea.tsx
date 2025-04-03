@@ -1,24 +1,28 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { MessageSquare, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import ChatHeader from './chatHeader';
 import MessagesList from './messagesList';
 import MessageInput from './messageInput';
-import { ChatSession as Chat, Message } from './types';
+import { ChatSession as Chat, Message } from '../types';
 import { v4 as uuid } from 'uuid';
+
 interface ChatMainAreaProps {
   currentChat: Chat | null;
   onCreateNewChat: () => void;
-  theme: string | undefined;
 }
 
-export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: ChatMainAreaProps) {
+export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainAreaProps) {
   const [messages, setMessages] = useState<Message[]>(currentChat?.messages || []);
 
-  console.log('currentChat', currentChat);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (currentChat) {
-      setMessages(currentChat.messages);
+      setMessages(currentChat.messages || []);
     }
   }, [currentChat]);
 
@@ -27,6 +31,7 @@ export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: Ch
 
     const fetchMessages = async () => {
       try {
+        setLoading(true);
         const res = await fetch(
           `/api/chat/${currentChat.id}/messages?&clerkId=${currentChat.userId}`
         );
@@ -34,7 +39,9 @@ export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: Ch
 
         const data: Message[] = await res.json();
         setMessages(data);
+        setLoading(false);
       } catch (err) {
+        setError('Failed to fetch messages');
         console.error('Error fetching messages:', err);
       } finally {
       }
@@ -43,8 +50,11 @@ export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: Ch
     fetchMessages();
   }, [currentChat]); // Run when currentChat changes
 
-  const clerkId = currentChat?.userId;
-  console.log('clerkId', clerkId);
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim() || !currentChat) return;
 
@@ -86,45 +96,49 @@ export default function ChatMainArea({ currentChat, onCreateNewChat, theme }: Ch
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden">
+    <div className="h-full w-full bg-background/60 backdrop-blur-sm flex flex-col">
       {currentChat ? (
         <>
-          <ChatHeader title={currentChat.title} theme={theme} />
-          <MessagesList messages={messages} theme={theme} />
-          <MessageInput theme={theme} onSendMessage={handleSendMessage} />
+          <ChatHeader title={currentChat.title} />
+          <div className="flex-1 flex flex-col justify-end overflow-hidden">
+            <MessagesList
+              messages={messages}
+              loading={loading}
+              error={error}
+              ref={messagesEndRef}
+            />
+          </div>
+          <MessageInput onSendMessage={handleSendMessage} />
         </>
       ) : (
-        <EmptyState onCreateNewChat={onCreateNewChat} theme={theme} />
+        <EmptyState onCreateNewChat={onCreateNewChat} />
       )}
     </div>
   );
 }
 
-function EmptyState({
-  onCreateNewChat,
-  theme,
-}: {
-  onCreateNewChat: () => void;
-  theme: string | undefined;
-}) {
+function EmptyState({ onCreateNewChat }: { onCreateNewChat: () => void }) {
   return (
-    <div className="flex h-full items-center justify-center overflow-hidden">
-      <div className="text-center max-w-md p-8">
-        <MessageSquare size={48} className="mx-auto mb-4 opacity-30" />
-        <h3 className="text-xl font-medium mb-2">Welcome to Quotify Chat</h3>
-        <p className={`mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-          Start a new chat or select an existing chat from the sidebar.
+    <div className="flex h-full items-center justify-center overflow-hidden p-4">
+      <div className="max-w-md w-full rounded-xl bg-card shadow-sm border p-8 text-center">
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <MessageSquare size={28} className="text-primary" />
+        </div>
+
+        <h3 className="text-xl font-semibold mb-3">Welcome to Quotica Chat</h3>
+
+        <p className="text-muted-foreground mb-6">
+          Chat with our AI to generate beautiful quote images. Start a new conversation to begin
+          creating custom images.
         </p>
-        <button
+
+        <Button
           onClick={onCreateNewChat}
-          className={`px-4 py-2 rounded-lg ${
-            theme === 'dark'
-              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
-          }`}
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
           Start New Chat
-        </button>
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
