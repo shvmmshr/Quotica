@@ -1,11 +1,25 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { motion } from "framer-motion"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-
+import * as React from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+interface HeroProps {
+  className?: string;
+  gradient?: boolean;
+  blur?: boolean;
+  titleClassName?: string;
+  subtitleClassName?: string;
+  actionsClassName?: string;
+  title: React.ReactNode;
+  subtitle: string;
+  actions: {
+    label: string;
+    href: string;
+    variant: 'default' | 'outline';
+  }[];
+}
 const Hero = React.forwardRef<HTMLElement, HeroProps>(
   (
     {
@@ -20,14 +34,14 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
       actionsClassName,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
       <section
         ref={ref}
         className={cn(
-          "relative z-0 flex min-h-[80vh] w-full flex-col items-center justify-center overflow-hidden rounded-md bg-background",
-          className,
+          'relative z-0 flex min-h-[80vh] w-full flex-col items-center justify-center overflow-hidden rounded-md bg-background',
+          className
         )}
         {...props}
       >
@@ -42,30 +56,30 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
 
             {/* Lamp effect */}
             <motion.div
-              initial={{ width: "8rem" }}
+              initial={{ width: '8rem' }}
               viewport={{ once: true }}
-              transition={{ ease: "easeInOut", delay: 0.3, duration: 0.8 }}
-              whileInView={{ width: "16rem" }}
+              transition={{ ease: 'easeInOut', delay: 0.3, duration: 0.8 }}
+              whileInView={{ width: '16rem' }}
               className="absolute top-0 z-30 h-36 -translate-y-[20%] rounded-full bg-primary/60 blur-2xl"
             />
 
             {/* Top line */}
             <motion.div
-              initial={{ width: "15rem" }}
+              initial={{ width: '15rem' }}
               viewport={{ once: true }}
-              transition={{ ease: "easeInOut", delay: 0.3, duration: 0.8 }}
-              whileInView={{ width: "30rem" }}
+              transition={{ ease: 'easeInOut', delay: 0.3, duration: 0.8 }}
+              whileInView={{ width: '30rem' }}
               className="absolute inset-auto z-50 h-0.5 -translate-y-[-10%] bg-primary/60"
             />
 
             {/* Left gradient cone */}
             <motion.div
-              initial={{ opacity: 0.5, width: "15rem" }}
-              whileInView={{ opacity: 1, width: "30rem" }}
+              initial={{ opacity: 0.5, width: '15rem' }}
+              whileInView={{ opacity: 1, width: '30rem' }}
               transition={{
                 delay: 0.3,
                 duration: 0.8,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
               style={{
                 backgroundImage: `conic-gradient(var(--conic-position), var(--tw-gradient-stops))`,
@@ -78,12 +92,12 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
 
             {/* Right gradient cone */}
             <motion.div
-              initial={{ opacity: 0.5, width: "15rem" }}
-              whileInView={{ opacity: 1, width: "30rem" }}
+              initial={{ opacity: 0.5, width: '15rem' }}
+              whileInView={{ opacity: 1, width: '30rem' }}
               transition={{
                 delay: 0.3,
                 duration: 0.8,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
               style={{
                 backgroundImage: `conic-gradient(var(--conic-position), var(--tw-gradient-stops))`,
@@ -99,37 +113,26 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
         <motion.div
           initial={{ y: 100, opacity: 0.5 }}
           viewport={{ once: true }}
-          transition={{ ease: "easeInOut", delay: 0.3, duration: 0.8 }}
+          transition={{ ease: 'easeInOut', delay: 0.3, duration: 0.8 }}
           whileInView={{ y: 0, opacity: 1 }}
           className="relative z-50 container flex justify-center flex-1 flex-col px-5 md:px-10 gap-4 -translate-y-20"
         >
           <div className="flex flex-col items-center text-center space-y-4">
             <h1
               className={cn(
-                "text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight",
-                titleClassName,
+                'text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight',
+                titleClassName
               )}
             >
               {title}
             </h1>
             {subtitle && (
-              <p
-                className={cn(
-                  "text-xl text-muted-foreground",
-                  subtitleClassName,
-                )}
-              >
-                {subtitle}
-              </p>
+              <p className={cn('text-xl text-muted-foreground', subtitleClassName)}>{subtitle}</p>
             )}
             {actions && actions.length > 0 && (
-              <div className={cn("flex gap-4", actionsClassName)}>
+              <div className={cn('flex gap-4', actionsClassName)}>
                 {actions.map((action, index) => (
-                  <Button
-                    key={index}
-                    variant={action.variant || "default"}
-                    asChild
-                  >
+                  <Button key={index} variant={action.variant || 'default'} asChild>
                     <Link href={action.href}>{action.label}</Link>
                   </Button>
                 ))}
@@ -138,9 +141,9 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
           </div>
         </motion.div>
       </section>
-    )
-  },
-)
-Hero.displayName = "Hero"
+    );
+  }
+);
+Hero.displayName = 'Hero';
 
-export { Hero }
+export { Hero };
