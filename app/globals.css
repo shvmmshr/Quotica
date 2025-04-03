@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -110,6 +110,14 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+.user-message {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.dark .user-message {
+  background-color: oklch(0.3 0 0); /* Adjust for better dark mode contrast */
+  color: oklch(0.985 0 0);
 }
 
 @layer base {
