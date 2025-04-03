@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(req: NextRequest, { params }: { params: { sessionId: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
   try {
     const { sessionId } = await params;
     const url = req.nextUrl; // Get the full URL
