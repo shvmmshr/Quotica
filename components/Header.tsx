@@ -4,6 +4,7 @@ import {
   SignedOut,
   SignInButton,
   SignUpButton,
+  useClerk,
   UserButton,
   useUser,
 } from '@clerk/nextjs';
@@ -16,12 +17,6 @@ import { Menu, MoveRight, X, Plus, History } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from '@/components/ui/navigation-menu';
 
 const pacifico = Pacifico({
   weight: '400',
@@ -44,24 +39,12 @@ export default function Header() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isOpen, setIsOpen] = useState(false); // Modal state
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile menu state
+  const { openSignIn } = useClerk();
 
-  const navigationItems = [
-    {
-      title: 'Editor',
-      href: '/editor',
-      description: 'Create beautiful quote images with our AI-powered editor',
-    },
-    {
-      title: 'Chat',
-      href: '/chat',
-      description: 'Generate images through natural conversation',
-    },
-    {
-      title: 'Pricing',
-      href: '/#pricing',
-      description: "View our pricing plans and choose what's right for you",
-    },
-  ];
+  const openSignInDialog = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openSignIn();
+  };
 
   useEffect(() => {
     const fetchCredits = async () => {
@@ -120,29 +103,30 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {navigationItems.map((item) => (
-                    <NavigationMenuItem key={item.title}>
-                      {item.href === '/#pricing' ? (
-                        <button
-                          onClick={scrollToPricing}
-                          className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-                        >
-                          {item.title}
-                        </button>
-                      ) : (
-                        <Link href={item.href} legacyBehavior passHref>
-                          <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                            {item.title}
-                          </NavigationMenuLink>
-                        </Link>
-                      )}
-                    </NavigationMenuItem>
-                  ))}
-                </NavigationMenuList>
-              </NavigationMenu>
+            <nav className="hidden md:flex items-center gap-3">
+              <SignedIn>
+                <Link href="/editor" passHref>
+                  <Button variant="ghost" size="sm">
+                    Editor
+                  </Button>
+                </Link>
+                <Link href="/chat" passHref>
+                  <Button variant="ghost" size="sm">
+                    Chat
+                  </Button>
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <Button variant="ghost" size="sm" onClick={openSignInDialog}>
+                  Editor
+                </Button>
+                <Button variant="ghost" size="sm" onClick={openSignInDialog}>
+                  Chat
+                </Button>
+              </SignedOut>
+              <Button variant="ghost" size="sm" onClick={scrollToPricing}>
+                Pricing
+              </Button>
             </nav>
           </div>
 
@@ -187,7 +171,7 @@ export default function Header() {
                   <span className="sr-only">Transaction History</span>
                 </Button>
               </div>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </SignedIn>
 
             <SignedOut>
@@ -223,34 +207,82 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="container mx-auto px-4 py-4 md:hidden border-t">
             <div className="flex flex-col space-y-4">
-              {navigationItems.map((item) =>
-                item.href === '/#pricing' ? (
-                  <button
-                    key={item.title}
-                    onClick={scrollToPricing}
-                    className="flex justify-between items-center py-2 hover:text-primary transition-colors"
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium">{item.title}</span>
-                      <span className="text-xs text-muted-foreground">{item.description}</span>
-                    </div>
-                    <MoveRight className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    className="flex justify-between items-center py-2 hover:text-primary transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium">{item.title}</span>
-                      <span className="text-xs text-muted-foreground">{item.description}</span>
-                    </div>
-                    <MoveRight className="w-4 h-4" />
-                  </Link>
-                )
-              )}
+              <SignedIn>
+                <Link
+                  href="/editor"
+                  className="flex justify-between items-center py-2 hover:text-primary transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">Editor</span>
+                    <span className="text-xs text-muted-foreground">
+                      Create beautiful quote images with our AI-powered editor
+                    </span>
+                  </div>
+                  <MoveRight className="w-4 h-4" />
+                </Link>
+
+                <Link
+                  href="/chat"
+                  className="flex justify-between items-center py-2 hover:text-primary transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">Chat</span>
+                    <span className="text-xs text-muted-foreground">
+                      Generate images through natural conversation
+                    </span>
+                  </div>
+                  <MoveRight className="w-4 h-4" />
+                </Link>
+              </SignedIn>
+
+              <SignedOut>
+                <button
+                  onClick={(e) => {
+                    openSignInDialog(e);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex justify-between items-center py-2 hover:text-primary transition-colors w-full text-left"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">Editor</span>
+                    <span className="text-xs text-muted-foreground">
+                      Create beautiful quote images with our AI-powered editor
+                    </span>
+                  </div>
+                  <MoveRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    openSignInDialog(e);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex justify-between items-center py-2 hover:text-primary transition-colors w-full text-left"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">Chat</span>
+                    <span className="text-xs text-muted-foreground">
+                      Generate images through natural conversation
+                    </span>
+                  </div>
+                  <MoveRight className="w-4 h-4" />
+                </button>
+              </SignedOut>
+
+              <button
+                onClick={scrollToPricing}
+                className="flex justify-between items-center py-2 hover:text-primary transition-colors w-full text-left"
+              >
+                <div className="flex flex-col">
+                  <span className="font-medium">Pricing</span>
+                  <span className="text-xs text-muted-foreground">
+                    View our pricing plans and choose what&apos;s right for you
+                  </span>
+                </div>
+                <MoveRight className="w-4 h-4" />
+              </button>
 
               <SignedIn>
                 <div className="flex items-center justify-between py-2">
@@ -311,11 +343,11 @@ export default function Header() {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="bg-background rounded-lg shadow-xl max-w-md w-full p-6 z-[200] border">
-                <Dialog.Title className="text-xl font-bold mb-4 flex items-center gap-2">
+              <div className="bg-background rounded-lg shadow-xl max-w-md w-full p-6 z-[200] border">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <History size={20} className="text-primary" />
                   <span>Transaction History</span>
-                </Dialog.Title>
+                </h2>
 
                 <div className="mt-4 space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                   {transactions.length > 0 ? (
@@ -356,7 +388,7 @@ export default function Header() {
                     </Button>
                   </Link>
                 </div>
-              </Dialog.Panel>
+              </div>
             </Transition.Child>
           </div>
         </Dialog>

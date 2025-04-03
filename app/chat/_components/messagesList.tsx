@@ -1,7 +1,7 @@
 'use client';
 
 import { MessageSquare, Loader2, AlertCircle } from 'lucide-react';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import ChatMessage from './chatMessage';
 import { Message } from '../types';
 
@@ -9,10 +9,21 @@ interface MessagesListProps {
   messages: Message[];
   loading?: boolean;
   error?: string | null;
+  isGeneratingImage?: boolean;
+  chatLoaded?: boolean; // Add this new prop
 }
-
 const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
-  ({ messages, loading, error }, ref) => {
+  ({ messages, loading, error, isGeneratingImage, chatLoaded }, ref) => {
+    // Scroll to bottom whenever messages change, image is loading, or chat is loaded
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        if (ref && typeof ref !== 'function') {
+          ref.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }, [messages, isGeneratingImage, chatLoaded, ref]);
+
     return (
       <div className="flex-1 overflow-y-auto py-4 px-4 sm:px-6 flex flex-col scroll-smooth">
         {loading ? (
@@ -44,10 +55,32 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} />
             ))}
+
+            {/* Image loading preview - matches ChatMessage UI */}
+            {isGeneratingImage && (
+              <div
+                className="flex w-full gap-2 justify-start"
+                style={{ paddingLeft: '20%', paddingRight: '20%' }}
+              >
+                <div className="max-w-[85%] rounded-2xl px-6 py-3 bg-muted">
+                  <div className="whitespace-pre-wrap break-words text-lg">
+                    <div className="relative">
+                      {/* Loading spinner matching ChatMessage style */}
+                      <div className="flex justify-center items-center w-full h-40">
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-primary"></div>
+                      </div>
+                      <p className="text-center text-muted-foreground mt-2">
+                        Generating your quote image...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Ensure proper scrolling by placing ref directly inside scrolling container */}
+        {/* This is the element we'll scroll to */}
         <div ref={ref} className="h-1" />
       </div>
     );
