@@ -1,27 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import {
-  Plus,
-  MessageSquare,
-  Pencil,
-  Trash,
-  Loader2,
-  Search,
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { ChatSession as Chat } from "../types";
-import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
-import { Dialog } from "@headlessui/react";
-import { Input } from "@/components/ui/input";
-import {
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarTrigger,
-  SidebarFooter,
-} from "@/components/blocks/sidebar";
+import { useState } from 'react';
+import { Plus, MessageSquare, Pencil, Trash, Loader2, Search } from 'lucide-react';
+import { ChatSession as Chat } from '../types';
+import { Button } from '@/components/ui/button';
+import { Dialog } from '@headlessui/react';
+import { Input } from '@/components/ui/input';
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -42,12 +26,11 @@ export default function ChatSidebar({
   onRenameChat,
   onDeleteChat,
 }: ChatSidebarProps) {
-  const { theme } = useTheme();
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const [renameChatId, setRenameChatId] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [newTitle, setNewTitle] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const handleRenameClick = (chat: Chat) => {
     setRenameChatId(chat.id);
@@ -56,11 +39,11 @@ export default function ChatSidebar({
   };
 
   const handleRenameSubmit = () => {
-    if (renameChatId && newTitle && newTitle.trim() !== "") {
+    if (renameChatId && newTitle && newTitle.trim() !== '') {
       onRenameChat(renameChatId, newTitle.trim());
       setIsRenaming(false);
       setRenameChatId(null);
-      setNewTitle("");
+      setNewTitle('');
     }
   };
 
@@ -72,9 +55,7 @@ export default function ChatSidebar({
 
   // Filter chats based on search query
   const filteredChats = searchQuery
-    ? chats.filter((chat) =>
-        chat.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : chats;
 
   return (
@@ -117,21 +98,16 @@ export default function ChatSidebar({
                 <div className="flex items-center justify-center p-8">
                   <div className="flex flex-col items-center text-center">
                     <Loader2 className="animate-spin text-primary" size={24} />
-                    <span className="mt-2 text-sm text-muted-foreground">
-                      Loading chats...
-                    </span>
+                    <span className="mt-2 text-sm text-muted-foreground">Loading chats...</span>
                   </div>
                 </div>
               ) : filteredChats.length === 0 ? (
                 <div className="p-8 text-center">
-                  <MessageSquare
-                    className="mx-auto mb-2 text-muted-foreground"
-                    size={24}
-                  />
+                  <MessageSquare className="mx-auto mb-2 text-muted-foreground" size={24} />
                   <p className="text-sm text-muted-foreground">
                     {searchQuery
-                      ? "No matching chats found"
-                      : "No chats yet. Start a new conversation!"}
+                      ? 'No matching chats found'
+                      : 'No chats yet. Start a new conversation!'}
                   </p>
                 </div>
               ) : (
@@ -139,11 +115,7 @@ export default function ChatSidebar({
                   <div
                     key={chat.id}
                     className={`group rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors
-                      ${
-                        currentChat?.id === chat.id
-                          ? "bg-accent/80"
-                          : "bg-background"
-                      }
+                      ${currentChat?.id === chat.id ? 'bg-accent/80' : 'bg-background'}
                     `}
                   >
                     <div
@@ -151,10 +123,7 @@ export default function ChatSidebar({
                       onClick={() => onSelectChat(chat)}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <MessageSquare
-                          size={18}
-                          className="text-primary shrink-0"
-                        />
+                        <MessageSquare size={18} className="text-primary shrink-0" />
                         <span className="truncate text-sm">{chat.title}</span>
                       </div>
 
@@ -204,21 +173,12 @@ export default function ChatSidebar({
       </div>
 
       {/* Rename Dialog */}
-      <Dialog
-        open={isRenaming}
-        onClose={() => setIsRenaming(false)}
-        className="relative z-50"
-      >
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-          aria-hidden="true"
-        />
+      <Dialog open={isRenaming} onClose={() => setIsRenaming(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl border">
-            <Dialog.Title className="text-lg font-medium mb-4">
-              Rename Chat
-            </Dialog.Title>
+            <Dialog.Title className="text-lg font-medium mb-4">Rename Chat</Dialog.Title>
 
             <input
               type="text"

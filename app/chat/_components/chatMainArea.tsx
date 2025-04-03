@@ -1,25 +1,20 @@
-"use client";
-import { useEffect, useState, useRef } from "react";
-import { MessageSquare, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import ChatHeader from "./chatHeader";
-import MessagesList from "./messagesList";
-import MessageInput from "./messageInput";
-import { ChatSession as Chat, Message } from "../types";
-import { v4 as uuid } from "uuid";
+'use client';
+import { useEffect, useState, useRef } from 'react';
+import { MessageSquare, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import ChatHeader from './chatHeader';
+import MessagesList from './messagesList';
+import MessageInput from './messageInput';
+import { ChatSession as Chat, Message } from '../types';
+import { v4 as uuid } from 'uuid';
 
 interface ChatMainAreaProps {
   currentChat: Chat | null;
   onCreateNewChat: () => void;
 }
 
-export default function ChatMainArea({
-  currentChat,
-  onCreateNewChat,
-}: ChatMainAreaProps) {
-  const [messages, setMessages] = useState<Message[]>(
-    currentChat?.messages || []
-  );
+export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainAreaProps) {
+  const [messages, setMessages] = useState<Message[]>(currentChat?.messages || []);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,21 +30,20 @@ export default function ChatMainArea({
     if (!currentChat) return;
 
     const fetchMessages = async () => {
-      setLoading(true);
-      setError(null);
       try {
+        setLoading(true);
         const res = await fetch(
           `/api/chat/${currentChat.id}/messages?&clerkId=${currentChat.userId}`
         );
-        if (!res.ok) throw new Error("Failed to fetch messages");
+        if (!res.ok) throw new Error('Failed to fetch messages');
 
         const data: Message[] = await res.json();
         setMessages(data);
-      } catch (err) {
-        setError("Failed to load messages");
-        console.error("Error fetching messages:", err);
-      } finally {
         setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch messages');
+        console.error('Error fetching messages:', err);
+      } finally {
       }
     };
 
@@ -58,7 +52,7 @@ export default function ChatMainArea({
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
@@ -69,7 +63,7 @@ export default function ChatMainArea({
       id: `temp-${uuid()}`, // Temporary ID
       chatSessionId: currentChat.id,
       content,
-      role: "user",
+      role: 'user',
       createdAt: new Date().toISOString(),
     };
 
@@ -78,29 +72,25 @@ export default function ChatMainArea({
 
     try {
       const res = await fetch(`/api/chat/${currentChat.id}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clerkId: currentChat.userId, content }),
       });
 
-      if (!res.ok) throw new Error("Failed to send message");
+      if (!res.ok) throw new Error('Failed to send message');
 
       const newMessages: Message[] = await res.json();
 
       // Replace temp message with actual messages from API
       setMessages((prevMessages) =>
-        prevMessages
-          .filter((msg) => msg.id !== tempMessage.id)
-          .concat(newMessages)
+        prevMessages.filter((msg) => msg.id !== tempMessage.id).concat(newMessages)
       );
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
 
       // Optionally show error UI (e.g., mark message as failed)
       setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === tempMessage.id ? { ...msg, error: true } : msg
-        )
+        prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
       );
     }
   };
@@ -138,8 +128,8 @@ function EmptyState({ onCreateNewChat }: { onCreateNewChat: () => void }) {
         <h3 className="text-xl font-semibold mb-3">Welcome to Quotica Chat</h3>
 
         <p className="text-muted-foreground mb-6">
-          Chat with our AI to generate beautiful quote images. Start a new
-          conversation to begin creating custom images.
+          Chat with our AI to generate beautiful quote images. Start a new conversation to begin
+          creating custom images.
         </p>
 
         <Button

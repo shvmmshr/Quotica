@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { MessageSquare, Loader2, AlertCircle } from "lucide-react";
-import { forwardRef } from "react";
-import ChatMessage from "./ChatMessage";
-import { Message } from "../types";
+import { MessageSquare, Loader2, AlertCircle } from 'lucide-react';
+import { forwardRef } from 'react';
+import ChatMessage from './chatMessage';
+import { Message } from '../types';
 
 interface MessagesListProps {
   messages: Message[];
@@ -19,9 +19,7 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
           {loading ? (
             <div className="flex flex-col items-center justify-center h-32">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-              <p className="text-sm text-muted-foreground">
-                Loading messages...
-              </p>
+              <p className="text-sm text-muted-foreground">Loading messages...</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center text-center p-6 rounded-lg bg-destructive/10 mx-auto">
@@ -36,12 +34,10 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <MessageSquare className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-2">
-                Start a new conversation
-              </h3>
+              <h3 className="text-lg font-medium mb-2">Start a new conversation</h3>
               <p className="text-sm text-muted-foreground max-w-md">
-                Ask about generating quote images, or type what kind of quote
-                image you want to create.
+                Ask about generating quote images, or type what kind of quote image you want to
+                create.
               </p>
             </div>
           ) : (
@@ -60,6 +56,6 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
   }
 );
 
-MessagesList.displayName = "MessagesList";
+MessagesList.displayName = 'MessagesList';
 
 export default MessagesList;

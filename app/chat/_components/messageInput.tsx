@@ -1,15 +1,15 @@
-"use client";
-import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { SendHorizonal } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+'use client';
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { SendHorizonal } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface MessageInputProps {
   onSendMessage: (text: string) => void;
 }
 
 export default function MessageInput({ onSendMessage }: MessageInputProps) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [rows, setRows] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -18,29 +18,29 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
     if (!textareaRef.current) return;
 
     // Reset height to auto to get the correct scrollHeight
-    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = 'auto';
 
     // Calculate new height based on scrollHeight (with max-height constraint)
     const newHeight = Math.min(textareaRef.current.scrollHeight, 150);
     textareaRef.current.style.height = `${newHeight}px`;
 
     // Set rows for styling/spacing
-    setRows(message.split("\n").length);
+    setRows(message.split('\n').length);
   }, [message]);
 
   const sendMessage = () => {
     if (!message.trim()) return;
     onSendMessage(message);
-    setMessage("");
+    setMessage('');
 
     // Reset textarea height
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = 'auto';
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }

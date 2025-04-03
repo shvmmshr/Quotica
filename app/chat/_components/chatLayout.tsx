@@ -1,10 +1,10 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useRouter, usePathname } from "next/navigation";
-import ChatSidebar from "./chatSidebar";
-import ChatMainArea from "./chatMainArea";
-import { ChatSession as Chat } from "../types";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter, usePathname } from 'next/navigation';
+import ChatSidebar from './chatSidebar';
+import ChatMainArea from './chatMainArea';
+import { ChatSession as Chat } from '../types';
 
 export default function ChatLayout() {
   const { user, isLoaded } = useUser();
@@ -24,7 +24,7 @@ export default function ChatLayout() {
 
   // Parse the session ID from the URL and update state (no navigation)
   useEffect(() => {
-    const sessionId = pathname.split("/")[2] || null;
+    const sessionId = pathname.split('/')[2] || null;
     if (sessionId && chats.length > 0) {
       const matchedChat = chats.find((c) => c.id === sessionId);
       if (matchedChat) {
@@ -69,12 +69,12 @@ export default function ChatLayout() {
     setLoading(true);
     try {
       const response = await fetch(`/api/chat?userId=${userId}`);
-      if (!response.ok) throw new Error("Failed to fetch chats");
+      if (!response.ok) throw new Error('Failed to fetch chats');
 
       const chatData: Chat[] = await response.json();
       setChats(chatData);
     } catch (error) {
-      console.error("Error fetching chat sessions:", error);
+      console.error('Error fetching chat sessions:', error);
     } finally {
       setLoading(false);
     }
@@ -83,17 +83,17 @@ export default function ChatLayout() {
   // Update URL without page reload
   const updateUrl = (chatId: string) => {
     const url = `/chat/${chatId}`;
-    window.history.pushState({}, "", url);
+    window.history.pushState({}, '', url);
   };
 
   const createNewChat = async () => {
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
+      const response = await fetch('/api/chat', {
+        method: 'POST',
         body: JSON.stringify({ userId: user?.id }),
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
-      if (!response.ok) throw new Error("Failed to create chat");
+      if (!response.ok) throw new Error('Failed to create chat');
 
       const newChat: Chat = await response.json();
 
@@ -106,43 +106,39 @@ export default function ChatLayout() {
       // Update URL without page reload
       updateUrl(newChat.id);
     } catch (error) {
-      console.error("Error creating chat:", error);
+      console.error('Error creating chat:', error);
     }
   };
 
   const renameChat = async (chatId: string, newTitle: string) => {
     try {
       const response = await fetch(`/api/chat/${chatId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({ title: newTitle }),
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!response.ok) throw new Error("Failed to rename chat");
+      if (!response.ok) throw new Error('Failed to rename chat');
 
       setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.id === chatId ? { ...chat, title: newTitle } : chat
-        )
+        prevChats.map((chat) => (chat.id === chatId ? { ...chat, title: newTitle } : chat))
       );
 
       if (currentChat?.id === chatId) {
-        setCurrentChat((prevChat) =>
-          prevChat ? { ...prevChat, title: newTitle } : null
-        );
+        setCurrentChat((prevChat) => (prevChat ? { ...prevChat, title: newTitle } : null));
       }
     } catch (error) {
-      console.error("Error renaming chat:", error);
+      console.error('Error renaming chat:', error);
     }
   };
 
   const deleteChat = async (chatId: string) => {
     try {
       const response = await fetch(`/api/chat/${chatId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error("Failed to delete chat");
+      if (!response.ok) throw new Error('Failed to delete chat');
 
       // Update chats list
       const updatedChats = chats.filter((chat) => chat.id !== chatId);
@@ -155,11 +151,11 @@ export default function ChatLayout() {
           updateUrl(updatedChats[0].id);
         } else {
           setCurrentChat(null);
-          router.push("/chat");
+          router.push('/chat');
         }
       }
     } catch (error) {
-      console.error("Error deleting chat:", error);
+      console.error('Error deleting chat:', error);
     }
   };
 
@@ -200,10 +196,7 @@ export default function ChatLayout() {
         />
 
         <div className="flex-1">
-          <ChatMainArea
-            currentChat={currentChat}
-            onCreateNewChat={createNewChat}
-          />
+          <ChatMainArea currentChat={currentChat} onCreateNewChat={createNewChat} />
         </div>
       </div>
     </div>

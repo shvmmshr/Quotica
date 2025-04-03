@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { Button } from "./ui/button";
-import { ArrowRight, Image as ImageIcon, Sparkles } from "lucide-react";
-import Lenis from "lenis";
-import { Hero } from "./blocks/hero";
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { Button } from './ui/button';
+import { ArrowRight, Image as ImageIcon, Sparkles } from 'lucide-react';
+import Lenis from 'lenis';
+import { Hero } from './blocks/hero';
 
 const HeroSection: React.FC = () => {
   // Initialize Lenis for smooth scrolling
@@ -15,7 +15,7 @@ const HeroSection: React.FC = () => {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
+      orientation: 'vertical',
     });
 
     function raf(time: number) {
@@ -58,7 +58,7 @@ const HeroSection: React.FC = () => {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut",
+        ease: 'easeOut',
       },
     },
   };
@@ -77,14 +77,14 @@ const HeroSection: React.FC = () => {
         subtitle="Generate stunning, eye-catching images from your quotes with just a few clicks. Perfect for social media, presentations, or any creative project."
         actions={[
           {
-            label: "Create Now",
-            href: "/editor",
-            variant: "default",
+            label: 'Create Now',
+            href: '/editor',
+            variant: 'default',
           },
           {
-            label: "View Pricing",
-            href: "/membership",
-            variant: "outline",
+            label: 'View Pricing',
+            href: '/membership',
+            variant: 'outline',
           },
         ]}
       />
@@ -98,19 +98,12 @@ const HeroSection: React.FC = () => {
           variants={staggerChildren}
           className="text-center mb-16"
         >
-          <motion.h2
-            variants={fadeIn}
-            className="text-3xl md:text-4xl font-bold mb-4"
-          >
+          <motion.h2 variants={fadeIn} className="text-3xl md:text-4xl font-bold mb-4">
             Create Beautiful Quote Images with AI
           </motion.h2>
-          <motion.p
-            variants={fadeIn}
-            className="text-lg text-muted-foreground max-w-3xl mx-auto"
-          >
-            Quotica uses advanced AI to generate stunning visuals that match
-            your quotes perfectly. Stand out on social media with images that
-            capture attention.
+          <motion.p variants={fadeIn} className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Quotica uses advanced AI to generate stunning visuals that match your quotes perfectly.
+            Stand out on social media with images that capture attention.
           </motion.p>
         </motion.div>
 
@@ -131,8 +124,8 @@ const HeroSection: React.FC = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">AI Image Generation</h3>
             <p className="text-muted-foreground">
-              Turn your quotes into captivating images with our AI-powered
-              generator. Create unique visuals in seconds.
+              Turn your quotes into captivating images with our AI-powered generator. Create unique
+              visuals in seconds.
             </p>
           </motion.div>
 
@@ -149,8 +142,8 @@ const HeroSection: React.FC = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">Customizable Styles</h3>
             <p className="text-muted-foreground">
-              Choose from a variety of styles, themes, and moods to match your
-              brand or message perfectly.
+              Choose from a variety of styles, themes, and moods to match your brand or message
+              perfectly.
             </p>
           </motion.div>
 
@@ -167,8 +160,8 @@ const HeroSection: React.FC = () => {
             </div>
             <h3 className="text-xl font-semibold mb-2">Instant Download</h3>
             <p className="text-muted-foreground">
-              Generate and download high-quality images instantly. Ready for
-              social media, presentations, or any digital use.
+              Generate and download high-quality images instantly. Ready for social media,
+              presentations, or any digital use.
             </p>
           </motion.div>
         </motion.div>

@@ -1,8 +1,6 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import HeroSection from "../components/HeroSection";
-import PricingSection from "../components/PricingSection";
-import Footer from "../components/Footer";
+import HeroSection from '../components/HeroSection';
+import PricingSection from '../components/PricingSection';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (

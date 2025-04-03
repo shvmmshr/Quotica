@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import { motion } from "framer-motion";
-import { PricingCard } from "@/components/ui/dark-gradient-pricing";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { PricingCard } from '@/components/ui/dark-gradient-pricing';
 
 const PricingSection = () => {
   const fadeIn = {
@@ -15,30 +15,30 @@ const PricingSection = () => {
   };
 
   const freeBenefits = [
-    { text: "1 credit for free", checked: true },
-    { text: "Basic image generation", checked: true },
-    { text: "Limited style options", checked: true },
-    { text: "Share on social media", checked: true },
-    { text: "Priority support", checked: false },
-    { text: "Advanced customization", checked: false },
+    { text: '1 credit for free', checked: true },
+    { text: 'Basic image generation', checked: true },
+    { text: 'Limited style options', checked: true },
+    { text: 'Share on social media', checked: true },
+    { text: 'Priority support', checked: false },
+    { text: 'Advanced customization', checked: false },
   ];
 
   const proBenefits = [
-    { text: "100 credits", checked: true },
-    { text: "Advanced image generation", checked: true },
-    { text: "All style options", checked: true },
-    { text: "Share on social media", checked: true },
-    { text: "Priority support", checked: true },
-    { text: "Advanced customization", checked: true },
+    { text: '100 credits', checked: true },
+    { text: 'Advanced image generation', checked: true },
+    { text: 'All style options', checked: true },
+    { text: 'Share on social media', checked: true },
+    { text: 'Priority support', checked: true },
+    { text: 'Advanced customization', checked: true },
   ];
 
   const enterpriseBenefits = [
-    { text: "Unlimited credits", checked: true },
-    { text: "Premium image generation", checked: true },
-    { text: "All style options", checked: true },
-    { text: "Share on social media", checked: true },
-    { text: "Dedicated support", checked: true },
-    { text: "Custom branding", checked: true },
+    { text: 'Unlimited credits', checked: true },
+    { text: 'Premium image generation', checked: true },
+    { text: 'All style options', checked: true },
+    { text: 'Share on social media', checked: true },
+    { text: 'Dedicated support', checked: true },
+    { text: 'Custom branding', checked: true },
   ];
 
   return (
@@ -55,8 +55,8 @@ const PricingSection = () => {
             Simple, Transparent Pricing
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that's right for you. All plans include access to
-            our image generation tool.
+            Choose the plan that&apos;s right for you. All plans include access to our image
+            generation tool.
           </p>
         </div>
 
@@ -89,13 +89,10 @@ const PricingSection = () => {
 
         <div className="mt-16 text-center">
           <p className="text-sm text-muted-foreground">
-            Need a custom plan?{" "}
-            <a
-              href="/contact"
-              className="text-primary underline underline-offset-2"
-            >
+            Need a custom plan?{' '}
+            <a href="/contact" className="text-primary underline underline-offset-2">
               Contact us
-            </a>{" "}
+            </a>{' '}
             for more information.
           </p>
         </div>
