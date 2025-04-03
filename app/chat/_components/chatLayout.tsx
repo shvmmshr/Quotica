@@ -33,6 +33,38 @@ export default function ChatLayout() {
     }
   }, [pathname, chats]);
 
+  // const fetchChats = async (userId: string) => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(`/api/chat?userId=${userId}`);
+  //     if (!response.ok) throw new Error("Failed to fetch chats");
+
+  //     const chatData: Chat[] = await response.json();
+  //     setChats(chatData);
+
+  //     // After fetching chats, check if there's a chat ID in the URL
+  //     const sessionId = pathname.split("/")[2];
+  //     if (sessionId) {
+  //       const matchedChat = chatData.find((c) => c.id === sessionId);
+  //       if (matchedChat) {
+  //         setCurrentChat(matchedChat);
+  //       } else if (chatData.length > 0) {
+  //         // If chat in URL doesn't exist but we have chats, update URL to first chat
+  //         updateUrl(chatData[0].id);
+  //         setCurrentChat(chatData[0]);
+  //       }
+  //     } else if (chatData.length > 0) {
+  //       // If no chat ID in URL but we have chats, set the first one as current
+  //       setCurrentChat(chatData[0]);
+  //       updateUrl(chatData[0].id);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching chat sessions:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchChats = async (userId: string) => {
     setLoading(true);
     try {
@@ -41,23 +73,6 @@ export default function ChatLayout() {
 
       const chatData: Chat[] = await response.json();
       setChats(chatData);
-
-      // After fetching chats, check if there's a chat ID in the URL
-      const sessionId = pathname.split("/")[2];
-      if (sessionId) {
-        const matchedChat = chatData.find((c) => c.id === sessionId);
-        if (matchedChat) {
-          setCurrentChat(matchedChat);
-        } else if (chatData.length > 0) {
-          // If chat in URL doesn't exist but we have chats, update URL to first chat
-          updateUrl(chatData[0].id);
-          setCurrentChat(chatData[0]);
-        }
-      } else if (chatData.length > 0) {
-        // If no chat ID in URL but we have chats, set the first one as current
-        setCurrentChat(chatData[0]);
-        updateUrl(chatData[0].id);
-      }
     } catch (error) {
       console.error("Error fetching chat sessions:", error);
     } finally {
