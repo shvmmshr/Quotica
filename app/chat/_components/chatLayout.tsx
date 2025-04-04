@@ -33,38 +33,6 @@ export default function ChatLayout() {
     }
   }, [pathname, chats]);
 
-  // const fetchChats = async (userId: string) => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await fetch(`/api/chat?userId=${userId}`);
-  //     if (!response.ok) throw new Error("Failed to fetch chats");
-
-  //     const chatData: Chat[] = await response.json();
-  //     setChats(chatData);
-
-  //     // After fetching chats, check if there's a chat ID in the URL
-  //     const sessionId = pathname.split("/")[2];
-  //     if (sessionId) {
-  //       const matchedChat = chatData.find((c) => c.id === sessionId);
-  //       if (matchedChat) {
-  //         setCurrentChat(matchedChat);
-  //       } else if (chatData.length > 0) {
-  //         // If chat in URL doesn't exist but we have chats, update URL to first chat
-  //         updateUrl(chatData[0].id);
-  //         setCurrentChat(chatData[0]);
-  //       }
-  //     } else if (chatData.length > 0) {
-  //       // If no chat ID in URL but we have chats, set the first one as current
-  //       setCurrentChat(chatData[0]);
-  //       updateUrl(chatData[0].id);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching chat sessions:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const fetchChats = async (userId: string) => {
     setLoading(true);
     try {
@@ -132,20 +100,27 @@ export default function ChatLayout() {
     }
   };
 
-  const deleteChat = async (chatId: string) => {
+  const deleteChat = async (chat: Chat) => {
     try {
-      const response = await fetch(`/api/chat/${chatId}`, {
+      const response = await fetch(`/api/chat/${chat.id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) throw new Error('Failed to delete chat');
+      // console.log(chat);
+      const deleteImagekitResponse = await fetch(`/api/imagekit`, {
+        method: 'DELETE',
+        body: JSON.stringify({ sessionId: chat.id }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!deleteImagekitResponse.ok) throw new Error('Failed to delete ImageKit folder');
 
       // Update chats list
-      const updatedChats = chats.filter((chat) => chat.id !== chatId);
+      const updatedChats = chats.filter((cha) => cha.id !== chat.id);
       setChats(updatedChats);
 
       // If deleted the current chat, select another one or clear
-      if (currentChat?.id === chatId) {
+      if (currentChat?.id === chat.id) {
         if (updatedChats.length > 0) {
           setCurrentChat(updatedChats[0]);
           updateUrl(updatedChats[0].id);

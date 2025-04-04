@@ -1,30 +1,37 @@
 import { NextResponse } from 'next/server';
 import imagekit from '@/lib/imageKit'; // Import your ImageKit utility
 
+interface ImageKitError {
+  help?: string;
+  message: string;
+  reason: string;
+}
+
 export async function POST(req: Request) {
   try {
-    // Parse the request body
-    const { file, fileName } = await req.json();
-    const folder = process.env.NEXT_PUBLIC_IMAGEKIT_FOLDER || 'resumes';
+    const { imageUrl, fileName, sessionId } = await req.json();
 
-    // Validate the request body
-    if (!file || !fileName) {
-      return NextResponse.json({ message: 'File and fileName are required' }, { status: 400 });
+    if (!imageUrl || !fileName || !sessionId) {
+      return NextResponse.json(
+        { message: 'imageUrl, fileName, and sessionId are required' },
+        { status: 400 }
+      );
     }
 
-    // Upload the file to ImageKit
+    const folder = `${process.env.NEXT_PUBLIC_IMAGEKIT_FOLDER}/${sessionId}`;
     const result = await imagekit.upload({
-      file: file, // Base64 file
+      file: imageUrl,
       fileName: fileName, // Unique file name
-      useUniqueFileName: false, // Overwrite if file exists
-      folder: folder, // Optional: Organize files in a folder
+      useUniqueFileName: true, // Avoid overwriting
+      folder: folder, // Store inside sessionId folder
     });
-
-    // Append a cache-busting timestamp to the URL
+    if (!result || !result.url) {
+      return NextResponse.json({ message: 'Failed to upload image' }, { status: 500 });
+    }
+    // Append cache-busting timestamp
     const timestamp = Date.now();
     const cacheBustedUrl = `${result.url}?v=${timestamp}`;
 
-    // Return the ImageKit URL with cache-busting headers
     return new Response(JSON.stringify({ url: cacheBustedUrl }), {
       status: 200,
       headers: {
@@ -35,78 +42,42 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error('Error uploading image to ImageKit:', error);
-    return new Response(JSON.stringify({ message: 'Failed to upload image' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
+    console.error('❌ Error uploading image to ImageKit:', error);
+    return new Response(JSON.stringify({ message: 'Failed to upload image' }), { status: 500 });
   }
 }
 
+// ✅ DELETE ENTIRE FOLDER (sessionId)
 export async function DELETE(req: Request) {
   try {
-    const { slug } = await req.json();
-    console.log('Deleting resume:', slug);
-    // Validate input
-    if (!slug) {
-      return NextResponse.json({ error: 'Missing slug in request' }, { status: 400 });
+    const { sessionId } = await req.json();
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
     }
 
-    // Search for fileId using file name
-    const filename = `name='${slug}'`;
-    // console.log('Searching for file:', filename);
-    const folder = process.env.NEXT_PUBLIC_IMAGEKIT_FOLDER || 'resumes';
-    const files = await imagekit.listFiles({ searchQuery: filename, path: `/${folder}/` });
-    // console.log('Files:', files);
-    if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'File not found in ImageKit' }, { status: 404 });
-    }
+    const folder = `${process.env.NEXT_PUBLIC_IMAGEKIT_FOLDER}/${sessionId}`;
 
-    // Find the correct file with a valid fileId
-    const file = files.find((f) => 'fileId' in f);
+    try {
+      await imagekit.deleteFolder(folder);
+      console.log('✅ Folder deleted successfully:', folder);
+    } catch (error: unknown) {
+      const err = error as ImageKitError;
 
-    if (!file || !('fileId' in file)) {
-      return NextResponse.json(
-        { error: 'Invalid file data received from ImageKit' },
-        { status: 500 }
-      );
-    }
-
-    // Delete the file from ImageKit
-    await imagekit.deleteFile(file.fileId);
-
-    // Cache-busting timestamp
-    const timestamp = Date.now();
-    const cacheBustedUrl = `${file.url}?v=${timestamp}`;
-
-    // Return response with cache-busting headers
-    return new Response(
-      JSON.stringify({ message: 'Resume deleted successfully', url: cacheBustedUrl }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
+      // Handle "FOLDER_NOT_FOUND" error gracefully
+      if (err?.reason === 'FOLDER_NOT_FOUND') {
+        console.warn('⚠️ Folder not found, but treating as success:', folder);
+        return NextResponse.json(
+          { message: 'Folder not found, treating as deleted' },
+          { status: 200 }
+        );
       }
-    );
+
+      throw error; // Re-throw for other errors
+    }
+
+    return NextResponse.json({ message: 'Folder deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error('❌ DELETE Resume Error:', error);
-    return new Response(JSON.stringify({ message: 'Failed to delete resume' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
+    console.error('❌ DELETE Folder Error:', error);
+    return NextResponse.json({ error: 'Failed to delete folder' }, { status: 500 });
   }
 }

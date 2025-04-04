@@ -29,7 +29,7 @@ interface ChatSidebarProps {
   onCreateNewChat: () => void;
   onSelectChat: (chat: Chat) => void;
   onRenameChat: (chatId: string, newTitle: string) => void;
-  onDeleteChat: (chatId: string) => Promise<void>;
+  onDeleteChat: (chat: Chat) => Promise<void>;
 }
 
 export default function ChatSidebar({
@@ -44,7 +44,7 @@ export default function ChatSidebar({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [renameChatId, setRenameChatId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState<string>('');
-  const [deleteChatId, setDeleteChatId] = useState<string | null>(null);
+  const [deleteChat, setDeleteChat] = useState<Chat | null>(null);
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState<boolean>(false);
@@ -66,15 +66,15 @@ export default function ChatSidebar({
   };
 
   const handleDeleteClick = (chat: Chat) => {
-    setDeleteChatId(chat.id);
+    setDeleteChat(chat);
     setIsDeleteDialogOpen(true);
     setChatToDelete(chat.title);
   };
 
   const handleDeleteConfirm = async () => {
-    if (deleteChatId) {
-      await onDeleteChat(deleteChatId);
-      setDeleteChatId(null);
+    if (deleteChat) {
+      await onDeleteChat(deleteChat);
+      setDeleteChat(null);
       setIsDeleteDialogOpen(false);
       setChatToDelete(null);
     }

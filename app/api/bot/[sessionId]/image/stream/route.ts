@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { v4 as uuid } from 'uuid';
 
 export async function GET(
   req: NextRequest,
@@ -23,13 +24,26 @@ export async function GET(
         // Simulate AI processing delay
         setTimeout(async () => {
           const imageUrl = `https://avatars.githubusercontent.com/u/95865224?v=4`;
+          const fileName = `image_${uuid()}}.png`;
+          const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageUrl,
+              fileName,
+              sessionId,
+            }),
+          });
 
+          if (!uploadResponse.ok) throw new Error('Failed to upload image to ImageKit');
           // Save the generated image URL to the database
+          const { url: imageKitUrl } = await uploadResponse.json();
+
           await prisma.message.create({
             data: {
               chatSessionId: sessionId,
               role: 'assistant',
-              content: imageUrl, // Store the image link
+              content: imageKitUrl, // Store the image link
             },
           });
 

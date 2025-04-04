@@ -4,7 +4,6 @@ import { v4 as uuid } from 'uuid';
 export async function POST(req: Request) {
   try {
     const { userId, creds } = await req.json();
-    console.log('userId:', userId);
     const numCreds = Number(creds);
 
     // Validate the input
@@ -45,10 +44,7 @@ export async function POST(req: Request) {
         transactionNumber: `pay_${uuid()}`,
       }),
     });
-    const transactionData = await transaction.json();
-    console.log('-------ADD TRANSACTION DATA START ---------');
-    console.log(transactionData);
-    console.log('-------ADD TRANSACTION DATA END ---------');
+    await transaction.json();
 
     return NextResponse.json(
       { message: 'Credits deducted successfully', credits: updatedUser.credits },
