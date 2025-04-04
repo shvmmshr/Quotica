@@ -27,18 +27,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { userId, type, amount, transactionNumber, creds } = await req.json();
-    console.log(
-      'userId:',
-      userId,
-      'type:',
-      type,
-      'amount:',
-      amount,
-      'transactionNumber:',
-      transactionNumber,
-      'creds:',
-      creds
-    );
+
     // Validate inputs
     if (!userId || !type || 0 > amount || !transactionNumber || creds < 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

@@ -8,9 +8,6 @@ export async function POST(
   try {
     const { sessionId } = await params;
     const { clerkId, content } = await req.json();
-    console.log('sessionId:', sessionId);
-    console.log('clerkId:', clerkId);
-    console.log('content:', content);
 
     if (!clerkId || !content.trim()) {
       return NextResponse.json({ error: 'clerkId and content are required' }, { status: 400 });
@@ -49,8 +46,6 @@ export async function GET(
     const { sessionId } = await params;
     const { searchParams } = new URL(req.url);
     const clerkId = searchParams.get('clerkId');
-    console.log('sessionId:', sessionId);
-    console.log('clerkId:', clerkId);
 
     if (!clerkId) {
       return NextResponse.json({ error: 'clerkId is required' }, { status: 400 });
