@@ -7,7 +7,7 @@ import MessagesList from './messagesList';
 import MessageInput from './messageInput';
 import { ChatSession as Chat, Message } from '../types';
 import { v4 as uuid } from 'uuid';
-import { models, DEFAULT_MODEL } from '@/lib/models';
+import { modelOptions } from '@/lib/models';
 import { useCredits } from '@/app/context/creditsContext';
 interface ChatMainAreaProps {
   currentChat: Chat | null;
@@ -77,9 +77,16 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async (content: string, selectedModel: string) => {
+  const handleSendMessage = async (content: string, selectedOptionId: string) => {
+    console.log('Sending message:', content);
+    console.log('Selected option ID:', selectedOptionId);
     if (!content.trim() || !currentChat) return;
-    const modelData = models[selectedModel as keyof typeof models] || models[DEFAULT_MODEL];
+
+    // Find the selected option from all model options
+    const selectedOption =
+      Object.values(modelOptions)
+        .flat()
+        .find((option) => option.id === selectedOptionId) || modelOptions.bot[0];
 
     // Create a temporary message object
     const tempMessage: Message = {
@@ -92,20 +99,31 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
 
     // Optimistically update UI (add user message)
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
-    const creditDeductionPromise = deductCredits(modelData.creditsPerMessage);
+    const creditDeductionPromise = deductCredits(selectedOption.credits);
 
     try {
+      // Send to chat API with model options
       await fetch(`/api/chat/${currentChat.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clerkId: currentChat.userId, content }),
+        body: JSON.stringify({
+          clerkId: currentChat.userId,
+          content,
+        }),
       });
 
       setIsGeneratingImage(true); // Set loading state
 
-      const eventSource = new EventSource(
-        `/api/${modelData.apiEndpoint}/${currentChat.id}/image/stream?content=${encodeURIComponent(content)}`
-      );
+      // Construct API endpoint with all necessary parameters
+      const endpoint =
+        `/api/${selectedOption.id.includes('dalle') ? 'dalle' : 'bot'}/${
+          currentChat.id
+        }/image/stream?content=${encodeURIComponent(content)}` +
+        `&model=${encodeURIComponent(selectedOption.name)}` +
+        `&quality=${selectedOption.quality || 'standard'}` +
+        `&size=${selectedOption.size || '1024x1024'}`;
+
+      const eventSource = new EventSource(endpoint);
 
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -143,7 +161,6 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
       );
     }
   };
-
   return (
     <div className="h-full w-full bg-background/60 backdrop-blur-sm flex flex-col">
       {currentChat ? (
