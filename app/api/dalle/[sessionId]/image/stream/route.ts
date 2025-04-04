@@ -10,9 +10,12 @@ type OpenAIImageRequest = {
   quality?: 'standard' | 'hd';
 };
 
-export async function GET(req: NextRequest, { params }: { params: { sessionId: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
   try {
-    const { sessionId } = params;
+    const { sessionId } = await params;
     const url = req.nextUrl;
 
     // Extract all parameters from the URL
