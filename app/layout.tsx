@@ -14,6 +14,7 @@ import { ThemeProvider } from 'next-themes';
 import Header from '@/components/Header';
 import { Analytics } from '@vercel/analytics/react';
 import { CreditsProvider } from './context/creditsContext';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -39,6 +40,7 @@ export default function RootLayout({
             </ThemeProvider>
             <Analytics />
           </body>
+          <GoogleAnalytics gaId="G-3KP7E525VS" />
         </html>
       </CreditsProvider>
     </ClerkProvider>
