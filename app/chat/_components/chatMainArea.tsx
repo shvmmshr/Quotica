@@ -7,7 +7,7 @@ import MessagesList from './messagesList';
 import MessageInput from './messageInput';
 import { ChatSession as Chat, Message } from '../types';
 import { v4 as uuid } from 'uuid';
-
+import { models, DEFAULT_MODEL } from '@/lib/models';
 interface ChatMainAreaProps {
   currentChat: Chat | null;
   onCreateNewChat: () => void;
@@ -19,7 +19,14 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [chatLoaded, setChatLoaded] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
+  useEffect(() => {
+    if (currentChat) {
+      setChatLoaded(true);
+    }
+  }, [currentChat]);
   useEffect(() => {
     if (currentChat) {
       setMessages(currentChat.messages || []);
@@ -27,68 +34,105 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
   }, [currentChat]);
 
   useEffect(() => {
-    if (!currentChat) return;
+    let isMounted = true;
 
-    const fetchMessages = async () => {
+    const fetchData = async () => {
+      if (!currentChat) return;
+
+      setMessages([]); // Clear messages immediately
+
       try {
         setLoading(true);
         const res = await fetch(
           `/api/chat/${currentChat.id}/messages?&clerkId=${currentChat.userId}`
         );
-        if (!res.ok) throw new Error('Failed to fetch messages');
 
+        if (!res.ok) throw new Error('Failed to fetch messages');
         const data: Message[] = await res.json();
-        setMessages(data);
-        setLoading(false);
+
+        if (isMounted) {
+          setMessages(data);
+        }
       } catch (err) {
-        setError('Failed to fetch messages');
-        console.error('Error fetching messages:', err);
+        if (isMounted) {
+          setError(`Failed to fetch messages ${err}`);
+        }
       } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchMessages();
-  }, [currentChat]); // Run when currentChat changes
+    fetchData();
 
+    return () => {
+      isMounted = false;
+    };
+  }, [currentChat]);
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, selectedModel: string) => {
     if (!content.trim() || !currentChat) return;
+    const modelData = models[selectedModel as keyof typeof models] || models[DEFAULT_MODEL];
 
     // Create a temporary message object
     const tempMessage: Message = {
-      id: `temp-${uuid()}`, // Temporary ID
+      id: uuid(),
       chatSessionId: currentChat.id,
       content,
       role: 'user',
       createdAt: new Date().toISOString(),
     };
 
-    // Optimistically update UI
+    // Optimistically update UI (add user message)
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
 
     try {
-      const res = await fetch(`/api/chat/${currentChat.id}/messages`, {
+      await fetch(`/api/chat/${currentChat.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clerkId: currentChat.userId, content }),
       });
 
-      if (!res.ok) throw new Error('Failed to send message');
+      setIsGeneratingImage(true); // Set loading state
 
-      const newMessages: Message[] = await res.json();
-
-      // Replace temp message with actual messages from API
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg.id !== tempMessage.id).concat(newMessages)
+      const eventSource = new EventSource(
+        `/api/${modelData.apiEndpoint}/${currentChat.id}/image/stream?content=${encodeURIComponent(content)}`
       );
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setIsGeneratingImage(false); // Clear loading state
+
+        // Append AI response without removing user message
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: uuid(),
+            chatSessionId: currentChat.id,
+            content: data.imageUrl,
+            role: 'assistant',
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+
+        eventSource.close();
+      };
+
+      eventSource.onerror = () => {
+        setIsGeneratingImage(false); // Clear loading state on error
+        console.error('SSE Error');
+        eventSource.close();
+      };
     } catch (error) {
+      setIsGeneratingImage(false); // Clear loading state on error
       console.error('Error sending message:', error);
 
-      // Optionally show error UI (e.g., mark message as failed)
+      // Optionally mark message as failed
       setMessages((prevMessages) =>
         prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
       );
@@ -105,6 +149,8 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
               messages={messages}
               loading={loading}
               error={error}
+              isGeneratingImage={isGeneratingImage}
+              chatLoaded={chatLoaded}
               ref={messagesEndRef}
             />
           </div>

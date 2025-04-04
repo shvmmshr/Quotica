@@ -46,6 +46,7 @@
     "dotenv": "^16.4.7",
     "framer-motion": "^12.5.0",
     "html2canvas": "^1.4.1",
+    "imagekit": "^6.0.0",
     "langchain": "^0.3.19",
     "lenis": "^1.2.3",
     "lint-staged": "^15.5.0",

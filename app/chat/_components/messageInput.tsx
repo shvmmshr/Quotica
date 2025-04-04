@@ -3,30 +3,31 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUpIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { models, DEFAULT_MODEL } from '@/lib/models';
 
-interface MessageInputProps {
-  onSendMessage: (text: string) => void;
-}
-
-export default function MessageInput({ onSendMessage }: MessageInputProps) {
+export default function MessageInput({
+  onSendMessage,
+}: {
+  onSendMessage: (text: string, model: string) => void;
+}) {
   const [message, setMessage] = useState('');
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-adjust height
   useEffect(() => {
     if (!textareaRef.current) return;
 
-    textareaRef.current.style.height = 'auto'; // Reset height to recalculate
+    textareaRef.current.style.height = 'auto';
     const newHeight = Math.min(textareaRef.current.scrollHeight, 200);
     textareaRef.current.style.height = `${newHeight}px`;
   }, [message]);
 
   const sendMessage = () => {
     if (!message.trim()) return;
-    onSendMessage(message);
+    onSendMessage(message, selectedModel);
     setMessage('');
 
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
@@ -42,6 +43,19 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
   return (
     <div className="sticky bottom-0 z-10 px-4 py-4 bg-transparent backdrop-blur-sm">
       <div className="max-w-4xl mx-auto flex items-center gap-3 p-3 bg-card/40 backdrop-blur-md rounded-2xl shadow-lg border border-border/40">
+        {/* Model Selector Dropdown */}
+        <select
+          value={selectedModel}
+          onChange={(e) => setSelectedModel(e.target.value)}
+          className="px-4 py-2 rounded-md border border-border bg-background focus-visible:ring-0 focus-visible:outline-none"
+        >
+          {Object.entries(models).map(([key, model]) => (
+            <option key={key} value={key}>
+              {model.name}
+            </option>
+          ))}
+        </select>
+
         <Textarea
           ref={textareaRef}
           value={message}
