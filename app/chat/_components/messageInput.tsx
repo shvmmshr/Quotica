@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { models, DEFAULT_MODEL } from '@/lib/models';
+import { useCredits } from '@/app/context/creditsContext'; // Ensure this is the correct path
+import { toast } from 'sonner'; // Assuming Sonner is used for notifications
 
 export default function MessageInput({
   onSendMessage,
@@ -13,6 +15,10 @@ export default function MessageInput({
   const [message, setMessage] = useState('');
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { credits } = useCredits();
+  const modelData = models[selectedModel as keyof typeof models];
+  const requiredCredits = modelData.creditsPerMessage;
 
   // Auto-adjust height
   useEffect(() => {
@@ -25,6 +31,13 @@ export default function MessageInput({
 
   const sendMessage = () => {
     if (!message.trim()) return;
+
+    // Check if the user has enough credits
+    if (credits < requiredCredits) {
+      toast.error(`Not enough credits! ${modelData.name} requires ${requiredCredits} credits.`);
+      return;
+    }
+
     onSendMessage(message, selectedModel);
     setMessage('');
 
