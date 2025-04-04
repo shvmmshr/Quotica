@@ -13,6 +13,7 @@ import {
 import { ThemeProvider } from 'next-themes';
 import Header from '@/components/Header';
 import { Analytics } from '@vercel/analytics/react';
+import { CreditsProvider } from './context/creditsContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,16 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
-          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <Header /> {/* Use the Header component */}
-            {children}
-            <Toaster />
-          </ThemeProvider>
-          <Analytics />
-        </body>
-      </html>
+      <CreditsProvider>
+        <html lang="en" suppressHydrationWarning>
+          <body className={inter.className}>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+              <Header /> {/* Use the Header component */}
+              {children}
+              <Toaster />
+            </ThemeProvider>
+            <Analytics />
+          </body>
+        </html>
+      </CreditsProvider>
     </ClerkProvider>
   );
 }

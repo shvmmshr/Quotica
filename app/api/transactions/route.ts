@@ -1,31 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma"; // Adjust the import path if needed
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma'; // Adjust the import path if needed
 
 // **GET Transactions by userId**
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     const transactions = await prisma.transaction.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" }, // Sort by latest transactions
+      orderBy: { createdAt: 'desc' }, // Sort by latest transactions
     });
 
     return NextResponse.json({ success: true, transactions }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching transactions:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error('Error fetching transactions:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -33,13 +27,21 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { userId, type, amount, transactionNumber, creds } = await req.json();
-
+    console.log(
+      'userId:',
+      userId,
+      'type:',
+      type,
+      'amount:',
+      amount,
+      'transactionNumber:',
+      transactionNumber,
+      'creds:',
+      creds
+    );
     // Validate inputs
-    if (!userId || !type || !amount || !transactionNumber || !creds) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    if (!userId || !type || 0 > amount || !transactionNumber || creds < 0) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     const numCreds = Number(creds);
     const numAmount = Number(amount);
@@ -53,15 +55,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      { success: true, transaction: newTransaction },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, transaction: newTransaction }, { status: 201 });
   } catch (error) {
-    console.error("Error adding transaction:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error('Error adding transaction:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

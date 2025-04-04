@@ -8,6 +8,7 @@ import MessageInput from './messageInput';
 import { ChatSession as Chat, Message } from '../types';
 import { v4 as uuid } from 'uuid';
 import { models, DEFAULT_MODEL } from '@/lib/models';
+import { useCredits } from '@/app/context/creditsContext';
 interface ChatMainAreaProps {
   currentChat: Chat | null;
   onCreateNewChat: () => void;
@@ -21,6 +22,7 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatLoaded, setChatLoaded] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const { deductCredits } = useCredits();
 
   useEffect(() => {
     if (currentChat) {
@@ -90,6 +92,7 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
 
     // Optimistically update UI (add user message)
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
+    const creditDeductionPromise = deductCredits(modelData.creditsPerMessage);
 
     try {
       await fetch(`/api/chat/${currentChat.id}/messages`, {
@@ -128,6 +131,8 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
         console.error('SSE Error');
         eventSource.close();
       };
+
+      await creditDeductionPromise;
     } catch (error) {
       setIsGeneratingImage(false); // Clear loading state on error
       console.error('Error sending message:', error);

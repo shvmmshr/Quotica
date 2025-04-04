@@ -12,17 +12,12 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Pacifico } from 'next/font/google';
-import { useEffect, useState } from 'react';
-import { Menu, MoveRight, X, Plus, History } from 'lucide-react';
+import { Menu, MoveRight, X, Plus, History, Info } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
-
-const pacifico = Pacifico({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-});
+import { Dialog, Transition, TransitionChild } from '@headlessui/react';
+import { Fragment, useState } from 'react';
+import { useCredits } from '@/app/context/creditsContext';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 interface Transaction {
   id: string;
@@ -30,50 +25,44 @@ interface Transaction {
   creds: number;
   amount: number;
   createdAt: string;
+  transactionNumber: string;
 }
+
+const pacifico = Pacifico({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export default function Header() {
   const { theme } = useTheme();
   const { user } = useUser();
-  const [credits, setCredits] = useState<number>(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isOpen, setIsOpen] = useState(false); // Modal state
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile menu state
+  const { credits, isLoading } = useCredits();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { openSignIn } = useClerk();
 
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isTransactionsLoading, setIsTransactionsLoading] = useState(false);
+
+  const fetchTransactions = async () => {
+    if (!user) return;
+
+    setIsTransactionsLoading(true);
+    try {
+      const res = await fetch(`/api/transactions?userId=${user.id}`);
+      const data = await res.json();
+      setTransactions(data.transactions);
+      setIsOpen(true);
+    } catch (error) {
+      console.error('Failed to fetch transactions', error);
+    } finally {
+      setIsTransactionsLoading(false);
+    }
+  };
   const openSignInDialog = (e: React.MouseEvent) => {
     e.preventDefault();
     openSignIn();
-  };
-
-  useEffect(() => {
-    const fetchCredits = async () => {
-      if (user) {
-        try {
-          const res = await fetch(`/api/credits/getCreds?userId=${user.id}`);
-          const data = await res.json();
-          setCredits(data.credits ?? 0);
-        } catch (error) {
-          console.error('Failed to fetch credits', error);
-        }
-      }
-    };
-
-    fetchCredits();
-  }, [user]);
-
-  // Fetch transactions when opening the modal
-  const fetchTransactions = async () => {
-    if (user) {
-      try {
-        const res = await fetch(`/api/transactions?userId=${user.id}`);
-        const data = await res.json();
-        setTransactions(data.transactions ?? []);
-        setIsOpen(true); // Open modal
-      } catch (error) {
-        console.error('Failed to fetch transactions', error);
-      }
-    }
   };
 
   const scrollToPricing = (e: React.MouseEvent) => {
@@ -146,7 +135,7 @@ export default function Header() {
                         credits < 1 ? 'text-red-500' : 'text-green-500'
                       }`}
                     >
-                      {credits.toFixed(2)}
+                      {isLoading ? '...' : credits.toFixed(2)}
                     </span>
                   </div>
                   <Link href="/membership">
@@ -160,14 +149,19 @@ export default function Header() {
                   </Link>
                 </div>
 
-                {/* Transaction History Button */}
+                {/* History Button */}
                 <Button
                   onClick={fetchTransactions}
                   variant="outline"
                   size="icon"
                   className="h-9 w-9 rounded-full border"
+                  disabled={isTransactionsLoading}
                 >
-                  <History size={16} />
+                  {isTransactionsLoading ? (
+                    <div className="animate-spin h-4 w-4 border-b-2 border-primary rounded-full" />
+                  ) : (
+                    <History size={16} />
+                  )}
                   <span className="sr-only">Transaction History</span>
                 </Button>
               </div>
@@ -287,7 +281,9 @@ export default function Header() {
               <SignedIn>
                 <div className="flex items-center justify-between py-2">
                   <div className="flex flex-col">
-                    <span className="font-medium">Credits: {credits.toFixed(2)}</span>
+                    <span className="font-medium">
+                      Credits: {isLoading ? '...' : credits.toFixed(2)}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       Available credits in your account
                     </span>
@@ -297,9 +293,15 @@ export default function Header() {
                       onClick={fetchTransactions}
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 rounded-full"
+                      className="h-9 w-9 rounded-full border"
+                      disabled={isTransactionsLoading}
                     >
-                      <History size={14} />
+                      {isTransactionsLoading ? (
+                        <div className="animate-spin h-4 w-4 border-b-2 border-primary rounded-full" />
+                      ) : (
+                        <History size={16} />
+                      )}
+                      <span className="sr-only">Transaction History</span>
                     </Button>
                     <Link href="/membership">
                       <Button size="icon" className="h-8 w-8 rounded-full">
@@ -327,69 +329,93 @@ export default function Header() {
         )}
       </header>
 
-      {/* Transaction Modal */}
+      {/* History Modal */}
       <Transition show={isOpen} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 z-[100]" onClose={() => setIsOpen(false)}>
-          {/* Background Blur Effect */}
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-20 backdrop-blur-lg" />
+        <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
 
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Transition.Child
+          <div className="fixed inset-0 flex items-end justify-center p-4">
+            <TransitionChild
               as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 translate-y-4"
+              enterTo="opacity-100 translate-y-0"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 translate-y-4"
             >
-              <div className="bg-background rounded-lg shadow-xl max-w-md w-full p-6 z-[200] border">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <History size={20} className="text-primary" />
-                  <span>Transaction History</span>
-                </h2>
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-t-xl bg-background border shadow-lg transition-all max-h-[80vh]">
+                {/* Header */}
+                <div className="p-4 border-b flex justify-between items-center">
+                  <h2 className="text-lg font-medium">Transaction History</h2>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="text-muted-foreground hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-                <div className="mt-4 space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                  {transactions.length > 0 ? (
-                    transactions.map((txn) => (
-                      <div key={txn.id} className="flex justify-between p-3 border rounded-lg">
-                        <div>
-                          <div
-                            className={`text-sm font-medium ${
-                              txn.type === 'credit' ? 'text-green-500' : 'text-amber-500'
-                            }`}
-                          >
-                            {txn.type === 'credit' ? 'Added' : 'Used'} {txn.creds} credits
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            ${(txn.amount / 100).toFixed(2)}
-                          </div>
-                        </div>
-                        <div className="text-xs text-muted-foreground self-center">
-                          {new Date(txn.createdAt).toLocaleString()}
-                        </div>
-                      </div>
-                    ))
+                {/* Content - Scrollable */}
+                <div className="max-h-[60vh] overflow-y-auto">
+                  {isTransactionsLoading ? (
+                    <div className="p-8 flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground">
+                      No transactions found
+                    </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No transactions found.</p>
+                    <div className="divide-y">
+                      <TooltipProvider>
+                        {transactions.map((txn) => (
+                          <div key={txn.id} className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="font-medium flex items-center gap-2">
+                                  {txn.type === 'credit' ? (
+                                    <span className="text-green-500">+{txn.creds} credits</span>
+                                  ) : (
+                                    <span className="text-amber-500">-{txn.creds} credits</span>
+                                  )}
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Transaction #{txn.transactionNumber}</p>
+                                      <p>{new Date(txn.createdAt).toLocaleString()}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  ${(txn.amount / 100).toFixed(2)}
+                                </div>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(txn.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </TooltipProvider>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-6 flex justify-between">
-                  <Button variant="outline" onClick={() => setIsOpen(false)}>
+                {/* Footer */}
+                <div className="p-4 border-t text-right">
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-2 bg-primary text-white rounded"
+                  >
                     Close
-                  </Button>
-                  <Link href="/membership">
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Plus size={16} className="mr-2" />
-                      Add Credits
-                    </Button>
-                  </Link>
+                  </button>
                 </div>
-              </div>
-            </Transition.Child>
+              </Dialog.Panel>
+            </TransitionChild>
           </div>
         </Dialog>
       </Transition>
