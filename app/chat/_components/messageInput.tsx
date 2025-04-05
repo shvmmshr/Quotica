@@ -118,7 +118,7 @@ export default function MessageInput({ onSendMessage, isMobile = false }: Messag
               )}
 
               {!isMobile && currentOption.quality && (
-                <span className="text-xs capitalize">{currentOption.quality}</span>
+                <span className="text-xs uppercase">{currentOption.quality}</span>
               )}
 
               <ChevronDownIcon
@@ -163,7 +163,7 @@ export default function MessageInput({ onSendMessage, isMobile = false }: Messag
                           )}
                         >
                           <div className="flex items-center gap-2">
-                            {option.quality && <span className="capitalize">{option.quality}</span>}
+                            {option.quality && <span className="uppercase">{option.quality}</span>}
                             {option.size && (
                               <span className="text-xs bg-muted px-2 py-0.5 rounded">
                                 {option.size}
