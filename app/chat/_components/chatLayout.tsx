@@ -5,15 +5,25 @@ import { useRouter, usePathname } from 'next/navigation';
 import ChatSidebar from './chatSidebar';
 import ChatMainArea from './chatMainArea';
 import { ChatSession as Chat } from '../types';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 export default function ChatLayout() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const pathname = usePathname();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Handle initial sidebar state based on screen size
+  useEffect(() => {
+    setSidebarOpen(!isMobile);
+  }, [isMobile]);
 
   // Handle initial loading and session changes from URL
   useEffect(() => {
@@ -73,6 +83,11 @@ export default function ChatLayout() {
 
       // Update URL without page reload
       updateUrl(newChat.id);
+
+      // Close sidebar on mobile after creating a new chat
+      if (isMobile) {
+        setSidebarOpen(false);
+      }
     } catch (error) {
       console.error('Error creating chat:', error);
     }
@@ -107,7 +122,7 @@ export default function ChatLayout() {
       });
 
       if (!response.ok) throw new Error('Failed to delete chat');
-      // console.log(chat);
+
       const deleteImagekitResponse = await fetch(`/api/imagekit`, {
         method: 'DELETE',
         body: JSON.stringify({ sessionId: chat.id }),
@@ -139,6 +154,10 @@ export default function ChatLayout() {
     updateUrl(chat.id); // Update URL without page reload
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -151,14 +170,27 @@ export default function ChatLayout() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-66px)] overflow-hidden bg-background/30">
+    <div className="h-[calc(100vh-66px)] overflow-hidden bg-background/30 relative">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl opacity-70"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Chat Layout as a flex container */}
+      {/* Mobile menu button */}
+      {isMobile && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleSidebar}
+          className="absolute top-3 left-3 z-50 h-9 w-9 rounded-full md:hidden shadow-md bg-background"
+        >
+          <Menu size={18} />
+          <span className="sr-only">Toggle menu</span>
+        </Button>
+      )}
+
+      {/* Chat Layout */}
       <div className="flex w-full h-full">
         <ChatSidebar
           chats={chats}
@@ -168,10 +200,26 @@ export default function ChatLayout() {
           onSelectChat={selectChat}
           onRenameChat={renameChat}
           onDeleteChat={deleteChat}
+          isMobile={isMobile}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
 
-        <div className="flex-1">
-          <ChatMainArea currentChat={currentChat} onCreateNewChat={createNewChat} />
+        {/* Overlay for mobile when sidebar is open */}
+        {isMobile && sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        <div className={`flex-1 ${isMobile ? 'w-full' : ''}`}>
+          <ChatMainArea
+            currentChat={currentChat}
+            onCreateNewChat={createNewChat}
+            isMobile={isMobile}
+            onToggleSidebar={toggleSidebar}
+          />
         </div>
       </div>
     </div>

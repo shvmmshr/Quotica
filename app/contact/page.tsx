@@ -165,7 +165,7 @@ export default function ContactUs() {
                 </div>
                 <h3 className="text-xl font-medium mb-2">Message Sent!</h3>
                 <p className="text-muted-foreground mb-4">
-                  Thank you for reaching out. We&aposll get back to you as soon as possible.
+                  Thank you for reaching out. We&apos;ll get back to you as soon as possible.
                 </p>
                 <button
                   onClick={() => setIsSubmitted(false)}

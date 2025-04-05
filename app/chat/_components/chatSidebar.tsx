@@ -1,7 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, MessageSquare, Pencil, Trash, Loader2, Search, MoreHorizontal } from 'lucide-react';
+import {
+  Plus,
+  MessageSquare,
+  Pencil,
+  Trash,
+  Loader2,
+  Search,
+  MoreHorizontal,
+  X,
+} from 'lucide-react';
 import { ChatSession as Chat } from '../types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +30,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -30,6 +41,9 @@ interface ChatSidebarProps {
   onSelectChat: (chat: Chat) => void;
   onRenameChat: (chatId: string, newTitle: string) => void;
   onDeleteChat: (chat: Chat) => Promise<void>;
+  isMobile?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export default function ChatSidebar({
@@ -40,6 +54,9 @@ export default function ChatSidebar({
   onSelectChat,
   onRenameChat,
   onDeleteChat,
+  isMobile = false,
+  isOpen = true,
+  onClose,
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [renameChatId, setRenameChatId] = useState<string | null>(null);
@@ -80,23 +97,45 @@ export default function ChatSidebar({
     }
   };
 
+  const handleChatSelect = (chat: Chat) => {
+    onSelectChat(chat);
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
   const filteredChats = searchQuery
     ? chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : chats;
 
   return (
-    <div className="w-90 border-r border-border/30 h-full bg-background/80 backdrop-blur-sm">
+    <div
+      className={cn(
+        'bg-background/80 backdrop-blur-sm border-r border-border/30 h-full',
+        isMobile
+          ? 'fixed inset-y-0 left-0 z-50 w-[280px] transition-transform transform duration-300 ease-in-out shadow-xl'
+          : 'w-[280px]',
+        isMobile && !isOpen && '-translate-x-full',
+        isMobile && isOpen && 'translate-x-0'
+      )}
+    >
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-4 border-b border-border/30">
           <h2 className="text-xl font-semibold">Chat History</h2>
+          {isMobile && onClose && (
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
+              <X size={18} />
+              <span className="sr-only">Close</span>
+            </Button>
+          )}
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* New Chat Button */}
-          <div className="px-4 py-2">
+          <div className="px-4 py-3">
             <Button
               onClick={onCreateNewChat}
-              className="w-full text-primary-foreground bg-primary hover:bg-primary/90 gap-2"
+              className="w-full text-primary-foreground bg-primary hover:bg-primary/90 gap-2 shadow-sm"
             >
               <Plus size={16} />
               <span>New Chat</span>
@@ -118,74 +157,84 @@ export default function ChatSidebar({
           </div>
 
           {/* Chats List */}
-          <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
-            {loading ? (
-              <div className="flex items-center justify-center p-8">
-                <Loader2 className="animate-spin text-primary" size={24} />
-                <span className="mt-2 text-sm text-muted-foreground">Loading chats...</span>
-              </div>
-            ) : filteredChats.length === 0 ? (
-              <div className="p-8 text-center">
-                <MessageSquare className="mx-auto mb-2 text-muted-foreground" size={24} />
-                <p className="text-sm text-muted-foreground">
-                  {searchQuery
-                    ? 'No matching chats found'
-                    : 'No chats yet. Start a new conversation!'}
-                </p>
-              </div>
-            ) : (
-              filteredChats.map((chat) => (
-                <div
-                  key={chat.id}
-                  className={`group rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors
-                    ${currentChat?.id === chat.id ? 'bg-accent/80' : 'bg-background'}
-                  `}
-                >
-                  <div
-                    className="flex items-center justify-between gap-2 p-3 cursor-pointer"
-                    onClick={() => onSelectChat(chat)}
-                  >
-                    <span className="truncate text-[16px] px-2 py-2">{chat.title}</span>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-full hover:bg-muted"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal size={24} />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[200px] text-lg">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRenameClick(chat);
-                          }}
-                          className="flex items-center gap-2"
-                        >
-                          <Pencil size={16} />
-                          Rename Chat
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(chat);
-                          }}
-                          className="flex items-center gap-2 text-destructive"
-                        >
-                          <Trash size={16} />
-                          Delete Chat
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+          <ScrollArea className="flex-1 px-2 py-2">
+            <div className="space-y-1">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center p-8">
+                  <Loader2 className="animate-spin text-primary mb-2" size={24} />
+                  <span className="text-sm text-muted-foreground">Loading chats...</span>
                 </div>
-              ))
-            )}
-          </div>
+              ) : filteredChats.length === 0 ? (
+                <div className="p-8 text-center">
+                  <MessageSquare className="mx-auto mb-2 text-muted-foreground" size={24} />
+                  <p className="text-sm text-muted-foreground">
+                    {searchQuery
+                      ? 'No matching chats found'
+                      : 'No chats yet. Start a new conversation!'}
+                  </p>
+                </div>
+              ) : (
+                filteredChats.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className={`group rounded-lg transition-colors
+                      ${
+                        currentChat?.id === chat.id
+                          ? 'bg-accent/80 text-accent-foreground'
+                          : 'hover:bg-accent/50 hover:text-accent-foreground'
+                      }
+                    `}
+                  >
+                    <div
+                      className="flex items-center justify-between gap-2 p-3 cursor-pointer"
+                      onClick={() => handleChatSelect(chat)}
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <MessageSquare size={16} className="text-muted-foreground" />
+                        <span className="truncate text-sm font-medium">{chat.title}</span>
+                      </div>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal size={16} />
+                            <span className="sr-only">More options</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[200px]">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRenameClick(chat);
+                            }}
+                            className="flex items-center gap-2"
+                          >
+                            <Pencil size={14} />
+                            Rename Chat
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(chat);
+                            }}
+                            className="flex items-center gap-2 text-destructive focus:text-destructive"
+                          >
+                            <Trash size={14} />
+                            Delete Chat
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
         </div>
       </div>
 

@@ -42,7 +42,7 @@ const PricingSection = () => {
   ];
 
   return (
-    <section id="pricing" className="py-20">
+    <section id="pricing" className="py-20 bg-muted/30 w-full">
       <motion.div
         initial="hidden"
         whileInView="visible"

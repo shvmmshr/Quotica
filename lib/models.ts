@@ -2,7 +2,7 @@
 export type ModelOption = {
   id: string;
   name: string;
-  quality?: 'standard' | 'hd';
+  quality?: 'sd' | 'hd';
   size?: '1024x1024' | '1024x1792' | '256x256' | '512x512';
   credits: number;
 };
@@ -39,14 +39,14 @@ export const modelOptions: Record<string, ModelOption[]> = {
     {
       id: 'dalle3-std',
       name: 'DALL·E 3',
-      quality: 'standard',
+      quality: 'sd',
       size: '1024x1024',
       credits: 10, // $0.04 -> 1 credit
     },
     {
       id: 'dalle3-std-1792',
       name: 'DALL·E 3',
-      quality: 'standard',
+      quality: 'sd',
       size: '1024x1792',
       credits: 20, // $0.08 -> 2 credits
     },

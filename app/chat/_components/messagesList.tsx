@@ -10,10 +10,11 @@ interface MessagesListProps {
   loading?: boolean;
   error?: string | null;
   isGeneratingImage?: boolean;
-  chatLoaded?: boolean; // Add this new prop
+  chatLoaded?: boolean;
+  isMobile?: boolean;
 }
 const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
-  ({ messages, loading, error, isGeneratingImage, chatLoaded }, ref) => {
+  ({ messages, loading, error, isGeneratingImage, chatLoaded, isMobile }, ref) => {
     // Scroll to bottom whenever messages change, image is loading, or chat is loaded
     useEffect(() => {
       const timer = setTimeout(() => {
@@ -25,7 +26,7 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
     }, [messages, isGeneratingImage, chatLoaded, ref]);
 
     return (
-      <div className="flex-1 overflow-y-auto py-4 px-4 sm:px-6 flex flex-col scroll-smooth">
+      <div className="flex-1 overflow-y-auto py-4 flex flex-col scroll-smooth">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-32">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
@@ -40,7 +41,7 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
             </p>
           </div>
         ) : messages?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center p-8">
+          <div className="flex flex-col items-center justify-center text-center p-4 sm:p-8">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <MessageSquare className="h-8 w-8 text-primary" />
             </div>
@@ -51,25 +52,24 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
             </p>
           </div>
         ) : (
-          <div className="flex flex-col space-y-6">
+          <div className="flex flex-col space-y-4 sm:space-y-6">
             {messages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} />
+              <ChatMessage key={msg.id} message={msg} isMobile={isMobile} />
             ))}
 
             {/* Image loading preview - matches ChatMessage UI */}
             {isGeneratingImage && (
-              <div
-                className="flex w-full gap-2 justify-start"
-                style={{ paddingLeft: '20%', paddingRight: '20%' }}
-              >
-                <div className="max-w-[85%] rounded-2xl px-6 py-3 bg-muted">
-                  <div className="whitespace-pre-wrap break-words text-lg">
+              <div className={`flex w-full gap-2 justify-start ${isMobile ? 'px-2' : 'px-[20%]'}`}>
+                <div
+                  className={`${isMobile ? 'max-w-[95%]' : 'max-w-[85%]'} rounded-2xl px-4 sm:px-6 py-3 bg-muted`}
+                >
+                  <div className="whitespace-pre-wrap break-words text-sm sm:text-lg">
                     <div className="relative">
                       {/* Loading spinner matching ChatMessage style */}
-                      <div className="flex justify-center items-center w-full h-40">
-                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-primary"></div>
+                      <div className="flex justify-center items-center w-full h-32 sm:h-40">
+                        <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-gray-300 border-t-primary"></div>
                       </div>
-                      <p className="text-center text-muted-foreground mt-2">
+                      <p className="text-center text-xs sm:text-sm text-muted-foreground mt-2">
                         Generating your quote image...
                       </p>
                     </div>
