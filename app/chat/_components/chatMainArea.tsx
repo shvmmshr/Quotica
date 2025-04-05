@@ -17,7 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface ChatMainAreaProps {
   currentChat: Chat | null;

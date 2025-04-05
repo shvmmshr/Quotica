@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Github, Instagram, Moon, Send, Sun, Twitter } from 'lucide-react';
+import { Github, Moon, Send, Sun, Twitter } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Pacifico } from 'next/font/google';
 
