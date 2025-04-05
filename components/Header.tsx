@@ -12,12 +12,27 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Pacifico } from 'next/font/google';
-import { Menu, MoveRight, X, Plus, History, Info } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { Dialog, Transition, TransitionChild } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Menu, MoveRight, X, Plus, History, Info, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
 import { useCredits } from '@/app/context/creditsContext';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
+import { MembershipDialog } from '@/app/membership/components/membership-dialog';
 
 interface Transaction {
   id: string;
@@ -35,11 +50,11 @@ const pacifico = Pacifico({
 });
 
 export default function Header() {
-  const { theme } = useTheme();
   const { user } = useUser();
   const { credits, isLoading } = useCredits();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMembershipOpen, setIsMembershipOpen] = useState(false);
   const { openSignIn } = useClerk();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -60,6 +75,7 @@ export default function Header() {
       setIsTransactionsLoading(false);
     }
   };
+
   const openSignInDialog = (e: React.MouseEvent) => {
     e.preventDefault();
     openSignIn();
@@ -79,6 +95,7 @@ export default function Header() {
       <header className="w-full border-b border-border/40 backdrop-blur-xl bg-background/70 sticky top-0 z-50 shadow-sm">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-1/2 h-1/2 bg-primary/5 blur-3xl rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-1/3 h-1/3 bg-purple-500/5 blur-3xl rounded-full" />
         </div>
         <div className="container mx-auto flex items-center justify-between h-16 px-4 py-2 md:px-6 max-w-7xl relative">
           <div className="flex items-center gap-8">
@@ -92,31 +109,86 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-3">
-              <SignedIn>
-                <Link href="/editor" passHref>
-                  <Button variant="ghost" size="sm">
-                    Editor
-                  </Button>
-                </Link>
-                <Link href="/chat" passHref>
-                  <Button variant="ghost" size="sm">
-                    Chat
-                  </Button>
-                </Link>
-              </SignedIn>
-              <SignedOut>
-                <Button variant="ghost" size="sm" onClick={openSignInDialog}>
-                  Editor
-                </Button>
-                <Button variant="ghost" size="sm" onClick={openSignInDialog}>
-                  Chat
-                </Button>
-              </SignedOut>
-              <Button variant="ghost" size="sm" onClick={scrollToPricing}>
-                Pricing
-              </Button>
-            </nav>
+            <div className="hidden md:block">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="bg-transparent">
+                      Features
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                        <li className="row-span-3">
+                          <NavigationMenuLink asChild>
+                            <Link
+                              className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/20 to-primary/5 p-6 no-underline outline-none focus:shadow-md"
+                              href="/chat"
+                            >
+                              <MessageSquare className="h-6 w-6 text-primary" />
+                              <div className="mb-2 mt-4 text-lg font-medium text-foreground">
+                                AI Chat
+                              </div>
+                              <p className="text-sm leading-tight text-muted-foreground">
+                                Chat with our AI assistant to generate beautiful images from your
+                                thoughts.
+                              </p>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                        <SignedIn>
+                          <li>
+                            <Link href="/chat" legacyBehavior passHref>
+                              <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                <div className="text-sm font-medium leading-none">Chat</div>
+                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                  Generate images through natural conversation
+                                </p>
+                              </NavigationMenuLink>
+                            </Link>
+                          </li>
+                        </SignedIn>
+                        <SignedOut>
+                          <li>
+                            <div onClick={openSignInDialog} className="cursor-pointer">
+                              <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                <div className="text-sm font-medium leading-none">Chat</div>
+                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                  Generate images through natural conversation
+                                </p>
+                              </div>
+                            </div>
+                          </li>
+                        </SignedOut>
+                        <li>
+                          <div onClick={scrollToPricing} className="cursor-pointer">
+                            <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                              <div className="text-sm font-medium leading-none">Pricing</div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                Check out our pricing plans
+                              </p>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link href="/chat" legacyBehavior passHref>
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Chat
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <div onClick={scrollToPricing} className="cursor-pointer">
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Pricing
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
           </div>
 
           <nav className="flex items-center gap-3">
@@ -124,11 +196,7 @@ export default function Header() {
               <div className="hidden md:flex items-center gap-4">
                 {/* Credits display with + button */}
                 <div className="flex overflow-hidden rounded-full">
-                  <div
-                    className={`flex items-center h-9 gap-1 px-4 py-1 ${
-                      theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                    } border rounded-l-full transition-all`}
-                  >
+                  <div className="flex items-center h-9 gap-1 px-4 py-1 bg-card border rounded-l-full transition-all">
                     <span className="text-sm font-medium">Credits:</span>
                     <span
                       className={`text-sm font-bold ${
@@ -138,15 +206,14 @@ export default function Header() {
                       {isLoading ? '...' : credits.toFixed(2)}
                     </span>
                   </div>
-                  <Link href="/membership">
-                    <Button
-                      size="icon"
-                      className="rounded-l-none rounded-r-full h-9 bg-primary hover:bg-primary/90"
-                    >
-                      <Plus size={16} />
-                      <span className="sr-only">Add Credits</span>
-                    </Button>
-                  </Link>
+                  <Button
+                    size="icon"
+                    className="rounded-l-none rounded-r-full h-9 bg-primary hover:bg-primary/90"
+                    onClick={() => setIsMembershipOpen(true)}
+                  >
+                    <Plus size={16} />
+                    <span className="sr-only">Add Credits</span>
+                  </Button>
                 </div>
 
                 {/* History Button */}
@@ -203,20 +270,6 @@ export default function Header() {
             <div className="flex flex-col space-y-4">
               <SignedIn>
                 <Link
-                  href="/editor"
-                  className="flex justify-between items-center py-2 hover:text-primary transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">Editor</span>
-                    <span className="text-xs text-muted-foreground">
-                      Create beautiful quote images with our AI-powered editor
-                    </span>
-                  </div>
-                  <MoveRight className="w-4 h-4" />
-                </Link>
-
-                <Link
                   href="/chat"
                   className="flex justify-between items-center py-2 hover:text-primary transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
@@ -232,22 +285,6 @@ export default function Header() {
               </SignedIn>
 
               <SignedOut>
-                <button
-                  onClick={(e) => {
-                    openSignInDialog(e);
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex justify-between items-center py-2 hover:text-primary transition-colors w-full text-left"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">Editor</span>
-                    <span className="text-xs text-muted-foreground">
-                      Create beautiful quote images with our AI-powered editor
-                    </span>
-                  </div>
-                  <MoveRight className="w-4 h-4" />
-                </button>
-
                 <button
                   onClick={(e) => {
                     openSignInDialog(e);
@@ -303,11 +340,13 @@ export default function Header() {
                       )}
                       <span className="sr-only">Transaction History</span>
                     </Button>
-                    <Link href="/membership">
-                      <Button size="icon" className="h-8 w-8 rounded-full">
-                        <Plus size={14} />
-                      </Button>
-                    </Link>
+                    <Button
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => setIsMembershipOpen(true)}
+                    >
+                      <Plus size={14} />
+                    </Button>
                   </div>
                 </div>
               </SignedIn>
@@ -329,96 +368,63 @@ export default function Header() {
         )}
       </header>
 
-      {/* History Modal */}
-      <Transition show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+      {/* Transaction History Dialog */}
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-md max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Transaction History</DialogTitle>
+            <DialogDescription>Your transaction history and credits usage.</DialogDescription>
+          </DialogHeader>
 
-          <div className="fixed inset-0 flex items-end justify-center p-4">
-            <TransitionChild
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 translate-y-4"
-              enterTo="opacity-100 translate-y-0"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-4"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-t-xl bg-background border shadow-lg transition-all max-h-[80vh]">
-                {/* Header */}
-                <div className="p-4 border-b flex justify-between items-center">
-                  <h2 className="text-lg font-medium">Transaction History</h2>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="text-muted-foreground hover:text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Content - Scrollable */}
-                <div className="max-h-[60vh] overflow-y-auto">
-                  {isTransactionsLoading ? (
-                    <div className="p-8 flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                    </div>
-                  ) : transactions.length === 0 ? (
-                    <div className="p-8 text-center text-muted-foreground">
-                      No transactions found
-                    </div>
-                  ) : (
-                    <div className="divide-y">
-                      <TooltipProvider>
-                        {transactions.map((txn) => (
-                          <div key={txn.id} className="p-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="font-medium flex items-center gap-2">
-                                  {txn.type === 'credit' ? (
-                                    <span className="text-green-500">+{txn.creds} credits</span>
-                                  ) : (
-                                    <span className="text-amber-500">-{txn.creds} credits</span>
-                                  )}
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Transaction #{txn.transactionNumber}</p>
-                                      <p>{new Date(txn.createdAt).toLocaleString()}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  ${(txn.amount / 100).toFixed(2)}
-                                </div>
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {new Date(txn.createdAt).toLocaleDateString()}
-                              </div>
-                            </div>
+          <div className="max-h-[60vh] overflow-y-auto">
+            {isTransactionsLoading ? (
+              <div className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">No transactions found</div>
+            ) : (
+              <div className="divide-y">
+                <TooltipProvider>
+                  {transactions.map((txn) => (
+                    <div key={txn.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-medium flex items-center gap-2">
+                            {txn.type === 'credit' ? (
+                              <span className="text-green-500">+{txn.creds} credits</span>
+                            ) : (
+                              <span className="text-amber-500">-{txn.creds} credits</span>
+                            )}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Transaction #{txn.transactionNumber}</p>
+                                <p>{new Date(txn.createdAt).toLocaleString()}</p>
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
-                        ))}
-                      </TooltipProvider>
+                          <div className="text-sm text-muted-foreground">
+                            ${(txn.amount / 100).toFixed(2)}
+                          </div>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(txn.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t text-right">
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 bg-primary text-white rounded"
-                  >
-                    Close
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </TransitionChild>
+                  ))}
+                </TooltipProvider>
+              </div>
+            )}
           </div>
-        </Dialog>
-      </Transition>
+        </DialogContent>
+      </Dialog>
+
+      {/* Membership Dialog */}
+      <MembershipDialog open={isMembershipOpen} onOpenChange={setIsMembershipOpen} />
     </>
   );
 }

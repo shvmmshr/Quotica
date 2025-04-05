@@ -69,21 +69,21 @@ const HeroSection: React.FC = () => {
         title={
           <div className="flex flex-col items-center gap-2">
             <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 dark:from-primary dark:to-blue-400">
-              Transform Your Quotes
+              Transform Your Thoughts
             </h1>
             <h1>Into Beautiful Images</h1>
           </div>
         }
-        subtitle="Generate stunning, eye-catching images from your quotes with just a few clicks. Perfect for social media, presentations, or any creative project."
+        subtitle="Generate stunning, eye-catching images from your thoughts with just a few clicks. Perfect for social media, presentations, or any creative project."
         actions={[
           {
-            label: 'Create Now',
-            href: '/editor',
+            label: 'Chat Now',
+            href: '/chat',
             variant: 'default',
           },
           {
             label: 'View Pricing',
-            href: '/membership',
+            href: '#pricing',
             variant: 'outline',
           },
         ]}
@@ -174,7 +174,7 @@ const HeroSection: React.FC = () => {
           className="text-center mt-16"
         >
           <SignedIn>
-            <Link href="/editor">
+            <Link href="/chat">
               <Button size="lg" className="rounded-full px-8">
                 Start Creating <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

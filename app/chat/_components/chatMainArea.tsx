@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { MessageSquare, ArrowRight } from 'lucide-react';
+import { MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChatHeader from './chatHeader';
 import MessagesList from './messagesList';
@@ -9,14 +9,30 @@ import { ChatSession as Chat, Message } from '../types';
 import { v4 as uuid } from 'uuid';
 import { modelOptions } from '@/lib/models';
 import { useCredits } from '@/app/context/creditsContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { useMediaQuery } from '@/hooks/use-media-query';
+
 interface ChatMainAreaProps {
   currentChat: Chat | null;
   onCreateNewChat: () => void;
+  isMobile?: boolean;
+  onToggleSidebar?: () => void;
 }
 
-export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainAreaProps) {
+export default function ChatMainArea({
+  currentChat,
+  onCreateNewChat,
+  isMobile = false,
+  onToggleSidebar,
+}: ChatMainAreaProps) {
   const [messages, setMessages] = useState<Message[]>(currentChat?.messages || []);
-
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -29,6 +45,7 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
       setChatLoaded(true);
     }
   }, [currentChat]);
+
   useEffect(() => {
     if (currentChat) {
       setMessages(currentChat.messages || []);
@@ -72,14 +89,13 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
       isMounted = false;
     };
   }, [currentChat]);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (content: string, selectedOptionId: string) => {
-    console.log('Sending message:', content);
-    console.log('Selected option ID:', selectedOptionId);
     if (!content.trim() || !currentChat) return;
 
     // Find the selected option from all model options
@@ -161,53 +177,86 @@ export default function ChatMainArea({ currentChat, onCreateNewChat }: ChatMainA
       );
     }
   };
+
   return (
     <div className="h-full w-full bg-background/60 backdrop-blur-sm flex flex-col">
       {currentChat ? (
         <>
-          <ChatHeader title={currentChat.title} />
-          <div className="flex-1 flex flex-col justify-end overflow-hidden">
+          <ChatHeader title={currentChat.title} isMobile={isMobile} onMenuClick={onToggleSidebar} />
+          <div className="flex-1 flex flex-col justify-end overflow-hidden relative px-1 sm:px-3">
+            {/* Background gradients */}
+            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 blur-3xl rounded-full opacity-60 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-purple-600/5 blur-3xl rounded-full opacity-60 pointer-events-none" />
+
             <MessagesList
               messages={messages}
               loading={loading}
               error={error}
               isGeneratingImage={isGeneratingImage}
               chatLoaded={chatLoaded}
+              isMobile={isMobile}
               ref={messagesEndRef}
             />
           </div>
-          <MessageInput onSendMessage={handleSendMessage} />
+          <div className="p-2 sm:p-4">
+            <MessageInput onSendMessage={handleSendMessage} isMobile={isMobile} />
+          </div>
         </>
       ) : (
-        <EmptyState onCreateNewChat={onCreateNewChat} />
+        <EmptyState onCreateNewChat={onCreateNewChat} isMobile={isMobile} />
       )}
     </div>
   );
 }
 
-function EmptyState({ onCreateNewChat }: { onCreateNewChat: () => void }) {
+interface EmptyStateProps {
+  onCreateNewChat: () => void;
+  isMobile?: boolean;
+}
+
+function EmptyState({ onCreateNewChat, isMobile }: EmptyStateProps) {
   return (
-    <div className="flex h-full items-center justify-center overflow-hidden p-4">
-      <div className="max-w-md w-full rounded-xl bg-card shadow-sm border p-8 text-center">
-        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <MessageSquare size={28} className="text-primary" />
-        </div>
+    <div className="flex h-full items-center justify-center overflow-hidden p-4 relative">
+      {/* Background gradients */}
+      <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-primary/5 blur-3xl rounded-full opacity-70 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-1/3 h-1/3 bg-purple-600/5 blur-3xl rounded-full opacity-70 pointer-events-none" />
 
-        <h3 className="text-xl font-semibold mb-3">Welcome to Quotica Chat</h3>
-
-        <p className="text-muted-foreground mb-6">
-          Chat with our AI to generate beautiful quote images. Start a new conversation to begin
-          creating custom images.
-        </p>
-
-        <Button
-          onClick={onCreateNewChat}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          Start New Chat
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      <Card className={`${isMobile ? 'max-w-full w-full' : 'max-w-md w-full'}`}>
+        <CardHeader className="text-center">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+            <MessageSquare size={28} className="text-primary" />
+          </div>
+          <CardTitle className="text-xl">Welcome to Quotica Chat</CardTitle>
+          <CardDescription>
+            Chat with our AI to generate beautiful quote images. Start a new conversation to begin.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center">
+          <div
+            className={`grid ${isMobile ? 'grid-cols-1 gap-2' : 'grid-cols-2 gap-4'} w-full mb-6`}
+          >
+            <div className="bg-card border rounded-lg p-4 text-center">
+              <Sparkles className="h-6 w-6 mx-auto mb-2 text-primary" />
+              <h3 className="text-sm font-medium mb-1">AI-Powered</h3>
+              <p className="text-xs text-muted-foreground">Advanced image generation</p>
+            </div>
+            <div className="bg-card border rounded-lg p-4 text-center">
+              <MessageSquare className="h-6 w-6 mx-auto mb-2 text-primary" />
+              <h3 className="text-sm font-medium mb-1">Chat Interface</h3>
+              <p className="text-xs text-muted-foreground">Easy and intuitive</p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button
+            onClick={onCreateNewChat}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Start New Chat
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
