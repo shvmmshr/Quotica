@@ -232,7 +232,7 @@ export default function MessageInput({
               disabled={isProcessing}
             >
               {isMobile ? (
-                <span>Model</span>
+                <span>{models[selectedModel as keyof typeof models].name}</span>
               ) : (
                 <span>{models[selectedModel as keyof typeof models].name}</span>
               )}
