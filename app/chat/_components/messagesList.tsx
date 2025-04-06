@@ -13,9 +13,9 @@ interface MessagesListProps {
   chatLoaded?: boolean;
   isMobile?: boolean;
 }
+
 const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
   ({ messages, loading, error, isGeneratingImage, chatLoaded, isMobile }, ref) => {
-    // Scroll to bottom whenever messages change, image is loading, or chat is loaded
     useEffect(() => {
       const timer = setTimeout(() => {
         if (ref && typeof ref !== 'function') {
@@ -57,7 +57,6 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
               <ChatMessage key={msg.id} message={msg} isMobile={isMobile} />
             ))}
 
-            {/* Image loading preview - matches ChatMessage UI */}
             {isGeneratingImage && (
               <div className={`flex w-full gap-2 justify-start ${isMobile ? 'px-2' : 'px-[20%]'}`}>
                 <div
@@ -65,7 +64,6 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
                 >
                   <div className="whitespace-pre-wrap break-words text-sm sm:text-lg">
                     <div className="relative">
-                      {/* Loading spinner matching ChatMessage style */}
                       <div className="flex justify-center items-center w-full h-32 sm:h-40">
                         <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-gray-300 border-t-primary"></div>
                       </div>
@@ -79,8 +77,6 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
             )}
           </div>
         )}
-
-        {/* This is the element we'll scroll to */}
         <div ref={ref} className="h-1" />
       </div>
     );

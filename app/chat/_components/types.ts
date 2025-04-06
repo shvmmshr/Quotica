@@ -2,7 +2,9 @@ export interface Message {
   id: string;
   chatSessionId: string;
   role: 'user' | 'assistant';
-  content: string;
+  content?: string;
+  imageUrl?: string;
+  promt?: string;
   createdAt: string;
 }
 

@@ -11,11 +11,13 @@ interface ChatMessageProps {
 
 export default function ChatMessage({ message, isMobile = false }: ChatMessageProps) {
   const isUser = message.role === 'user';
-  const hasError = 'error' in message && message.error;
-  const isImage = message?.content?.startsWith('https://');
+  const hasError = message.error;
+  const hasImage = !!message.imageUrl;
+  const hasContent = !!message.content;
+  const hasPrompt = !!message.promt;
 
-  const [loading, setLoading] = useState(isImage); // Start loading if it's an image
-  const [error, setError] = useState(false); // Track error state
+  const [imageLoading, setImageLoading] = useState(hasImage);
+  const [imageError, setImageError] = useState(false);
 
   return (
     <div
@@ -34,36 +36,45 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
         )}
       >
         <div className={cn('whitespace-pre-wrap break-words', isMobile ? 'text-sm' : 'text-lg')}>
-          {isImage ? (
-            <div className="relative">
-              {/* Loading spinner */}
-              {loading && (
+          {/* Show prompt if available (for user messages) */}
+
+          {/* Image display */}
+          {hasImage && (
+            <div className="relative mb-2">
+              {imageLoading && (
                 <div className="flex justify-center items-center w-full h-32 sm:h-40">
                   <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-gray-300 border-t-primary"></div>
                 </div>
               )}
 
-              {/* Image */}
-              {!error && (
+              {!imageError && (
                 <img
-                  src={message.content}
-                  alt="Generated"
-                  className={cn('rounded-lg w-full', loading ? 'hidden' : 'block')}
-                  onLoad={() => setLoading(false)} // Hide spinner when loaded
+                  src={message.imageUrl!}
+                  alt={message.promt || 'Generated image'}
+                  className={cn(
+                    'rounded-lg w-full max-h-[400px] object-contain',
+                    imageLoading ? 'hidden' : 'block'
+                  )}
+                  onLoad={() => setImageLoading(false)}
                   onError={() => {
-                    setLoading(false);
-                    setError(true);
-                  }} // Handle error
+                    setImageLoading(false);
+                    setImageError(true);
+                  }}
                 />
               )}
 
-              {/* Error message if image fails */}
-              {error && <p className="text-red-500">Failed to load image</p>}
+              {imageError && (
+                <div className="text-center p-4 text-red-500">Failed to load image</div>
+              )}
             </div>
-          ) : (
-            message.content
           )}
 
+          {/* Text content */}
+          {hasContent && (
+            <div className={hasImage || hasPrompt ? 'mt-2' : ''}>{message.content}</div>
+          )}
+
+          {/* Error message */}
           {hasError && (
             <div className="mt-2 text-xs font-medium">Error sending message. Please try again.</div>
           )}
