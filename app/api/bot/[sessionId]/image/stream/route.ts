@@ -23,7 +23,7 @@ export async function GET(
       async start(controller) {
         // Simulate AI processing delay
         setTimeout(async () => {
-          const imageUrl = `https://avatars.githubusercontent.com/u/95865224?v=4`;
+          const imageUrl = `https://picsum.photos/1080/1080?random=${uuid()}`;
           const fileName = `image_${uuid()}}.png`;
           const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
             method: 'POST',
@@ -43,7 +43,9 @@ export async function GET(
             data: {
               chatSessionId: sessionId,
               role: 'assistant',
-              content: imageKitUrl, // Store the image link
+              content: '', // Store the image link
+              imageUrl: imageKitUrl,
+              promt: '', // Store the prompt if needed
             },
           });
 

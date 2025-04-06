@@ -33,12 +33,15 @@ model ChatSession {
   title     String
 }
 
+
 model Message {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   chatSession ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
   chatSessionId String
   role        String   // "user" or "assistant"
-  content     String   // Text content of the message
+  content     String?  // Text content of the message (now optional)
+  imageUrl    String?  // URL of image (new optional field)
+  promt  String?
   createdAt   DateTime @default(now())
 }
 

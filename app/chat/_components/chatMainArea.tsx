@@ -107,14 +107,13 @@ export default function ChatMainArea({
     const tempMessage: Message = {
       id: uuid(),
       chatSessionId: currentChat.id,
-      content,
+      content: content,
       role: 'user',
       createdAt: new Date().toISOString(),
     };
 
     // Optimistically update UI (add user message)
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
-    const creditDeductionPromise = deductCredits(selectedOption.credits);
 
     try {
       // Send to chat API with model options
@@ -150,7 +149,8 @@ export default function ChatMainArea({
           {
             id: uuid(),
             chatSessionId: currentChat.id,
-            content: data.imageUrl,
+            imageUrl: data.imageUrl,
+            promt: content,
             role: 'assistant',
             createdAt: new Date().toISOString(),
           },
@@ -164,13 +164,135 @@ export default function ChatMainArea({
         console.error('SSE Error');
         eventSource.close();
       };
-
-      await creditDeductionPromise;
+      try {
+        await deductCredits(selectedOption.credits);
+      } catch (creditError) {
+        console.error('Failed to deduct credits:', creditError);
+      }
     } catch (error) {
       setIsGeneratingImage(false); // Clear loading state on error
       console.error('Error sending message:', error);
 
       // Optionally mark message as failed
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
+      );
+    }
+  };
+
+  const handleSendImage = async (imageBase64: string, prompt: string, selectedOptionId: string) => {
+    if (!imageBase64 || !currentChat) return;
+
+    // Find the selected option from all model options
+    const selectedOption =
+      Object.values(modelOptions)
+        .flat()
+        .find((option) => option.id === selectedOptionId) || modelOptions.bot[0];
+
+    // Create a temporary message object for the image
+    const tempMessage: Message = {
+      id: uuid(),
+      chatSessionId: currentChat.id,
+      imageUrl: imageBase64, // Temporary base64 URL for preview
+      role: 'user',
+      content: prompt,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistically update UI (add user message with image)
+    setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+    try {
+      setIsGeneratingImage(true);
+
+      // 1. First upload the original image to ImageKit
+      const fileName = `upload_${uuid()}.png`;
+      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: imageBase64,
+          fileName,
+          sessionId: currentChat.id,
+        }),
+      });
+
+      if (!uploadResponse.ok) throw new Error('Failed to upload image to ImageKit');
+      const { url: imageKitUrl } = await uploadResponse.json();
+
+      await fetch(`/api/chat/${currentChat.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clerkId: currentChat.userId,
+          content: prompt,
+          imageUrl: imageKitUrl,
+        }),
+      });
+
+      // 2. Send to GPT-4 Turbo for analysis
+      // const gptResponse = await fetch('/api/analyseImage', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     imageUrl: imageKitUrl,
+      //     prompt, // Optional user prompt
+      //   }),
+      // });
+
+      // if (!gptResponse.ok) throw new Error('Failed to analyze image');
+      // const { description } = await gptResponse.json();
+      const description = 'Generated image description';
+
+      // 3. Combine description with user prompt (if any)
+      const combinedPrompt = prompt ? `${description} ${prompt}` : description;
+
+      // 4. Generate new image with DALL-E (backend handles upload)
+      const endpoint =
+        `/api/${selectedOption.id.includes('dalle') ? 'dalle' : 'bot'}/${currentChat.id}/image/stream?content=${encodeURIComponent(combinedPrompt)}` +
+        `&model=${encodeURIComponent(selectedOption.name)}` +
+        `&quality=${selectedOption.quality || 'standard'}` +
+        `&size=${selectedOption.size || '1024x1024'}`;
+
+      const eventSource = new EventSource(endpoint);
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setIsGeneratingImage(false);
+
+        // Backend now returns the final ImageKit URL directly
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: uuid(),
+            chatSessionId: currentChat.id,
+            imageUrl: data.imageUrl, // Final ImageKit URL from backend
+            promt: combinedPrompt, // Store the prompt used for generation
+            role: 'assistant',
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+
+        // Backend also handles storing in ImageGeneration collection
+        eventSource.close();
+      };
+
+      eventSource.onerror = () => {
+        setIsGeneratingImage(false);
+        console.error('SSE Error');
+        eventSource.close();
+      };
+
+      try {
+        await deductCredits(selectedOption.credits);
+      } catch (creditError) {
+        console.error('Failed to deduct credits:', creditError);
+      }
+    } catch (error) {
+      setIsGeneratingImage(false);
+      console.error('Error processing image:', error);
+
+      // Mark message as failed
       setMessages((prevMessages) =>
         prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
       );
@@ -198,7 +320,11 @@ export default function ChatMainArea({
             />
           </div>
           <div className="p-2 sm:p-4">
-            <MessageInput onSendMessage={handleSendMessage} isMobile={isMobile} />
+            <MessageInput
+              onSendMessage={handleSendMessage}
+              onSendImage={handleSendImage}
+              isMobile={isMobile}
+            />
           </div>
         </>
       ) : (

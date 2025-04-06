@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const { sessionId } = await params;
-    const { clerkId, content } = await req.json();
+    const { clerkId, content, imageUrl } = await req.json();
 
     if (!clerkId || !content.trim()) {
       return NextResponse.json({ error: 'clerkId and content are required' }, { status: 400 });
@@ -28,6 +28,7 @@ export async function POST(
         chatSessionId: sessionId,
         role: 'user',
         content,
+        imageUrl,
       },
     });
 

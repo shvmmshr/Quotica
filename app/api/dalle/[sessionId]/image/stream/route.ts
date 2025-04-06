@@ -55,7 +55,7 @@ export async function GET(
 
           // Add quality parameter only for DALL-E 3
           if (openAiModel === 'dall-e-3') {
-            requestBody.quality = quality;
+            requestBody.quality = quality == 'hd' ? 'hd' : 'standard';
           }
 
           // Generate image with DALL·E
@@ -98,7 +98,9 @@ export async function GET(
             data: {
               chatSessionId: sessionId,
               role: 'assistant',
-              content: imageKitUrl,
+              content: null,
+              imageUrl: imageKitUrl,
+              promt: content,
             },
           });
 
