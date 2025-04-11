@@ -3,7 +3,10 @@ import prisma from '@/lib/prisma';
 import { v4 as uuid } from 'uuid';
 import { GoogleGenAI } from '@google/genai';
 
-export async function POST(req: NextRequest, { params }: { params: { sessionId: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
   try {
     const { sessionId } = await params;
     const { content, image, imagefileType } = await req.json();
