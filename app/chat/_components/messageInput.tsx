@@ -11,7 +11,13 @@ import Image from 'next/image';
 
 interface MessageInputProps {
   onSendMessage: (text: string, model: string) => void;
-  onSendImage: (imageFile: string, userPrompt: string, model: string) => void; // Now returns image URL
+  onSendImage: (imageFile: string, userPrompt: string, model: string) => void;
+  onSendImageGemini: (
+    imageFile: string,
+    userPrompt: string,
+    model: string,
+    imagefileType: string
+  ) => void;
   isMobile?: boolean;
 }
 
@@ -19,6 +25,7 @@ export default function MessageInput({
   onSendMessage,
   onSendImage,
   isMobile = false,
+  onSendImageGemini,
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
@@ -59,7 +66,15 @@ export default function MessageInput({
         reader.onload = async (event) => {
           const base64String = event.target?.result as string;
           clearImage();
-          await onSendImage(base64String, message, selectedOption);
+          if (
+            modelOptions[selectedModel as keyof typeof modelOptions].find(
+              (opt) => opt.id === selectedOption
+            )?.id === 'gemini'
+          ) {
+            await onSendImageGemini(base64String, message, selectedOption, imageFile.type);
+          } else {
+            await onSendImage(base64String, message, selectedOption);
+          }
           toast.success('Image processed');
           // Clear both image and text input after successful send
 
@@ -77,8 +92,16 @@ export default function MessageInput({
         setIsProcessing(false);
       }
     } else {
-      onSendMessage(message, selectedOption);
-      // Clear text input after sending
+      if (
+        modelOptions[selectedModel as keyof typeof modelOptions].find(
+          (opt) => opt.id === selectedOption
+        )?.id === 'gemini'
+      ) {
+        onSendImageGemini('', message, selectedOption, '');
+      } else {
+        onSendMessage(message, selectedOption);
+      }
+
       setMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';

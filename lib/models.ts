@@ -65,6 +65,13 @@ export const modelOptions: Record<string, ModelOption[]> = {
       credits: 30, // $0.12 -> 3 credits
     },
   ],
+  gemini: [
+    {
+      id: 'gemini',
+      name: 'Gemini',
+      credits: 0, // $0.04 -> 1 credit
+    },
+  ],
 };
 
 export const DEFAULT_MODEL = 'bot';
@@ -88,5 +95,11 @@ export const models = {
     apiEndpoint: 'dalle3',
     description: 'Generate images using DALL·E 3',
     creditsPerMessage: 3,
+  },
+  gemini: {
+    name: 'Gemini',
+    apiEndpoint: 'gemini',
+    description: 'Generate images using Gemini',
+    creditsPerMessage: 1,
   },
 };
