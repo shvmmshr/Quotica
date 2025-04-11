@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Message } from '../types';
-
+import Image from 'next/image';
 interface ChatMessageProps {
   message: Message;
   isMobile?: boolean;
@@ -48,19 +48,22 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
               )}
 
               {!imageError && (
-                <img
-                  src={message.imageUrl!}
-                  alt={message.promt || 'Generated image'}
-                  className={cn(
-                    'rounded-lg w-full max-h-[400px] object-contain',
-                    imageLoading ? 'hidden' : 'block'
-                  )}
-                  onLoad={() => setImageLoading(false)}
-                  onError={() => {
-                    setImageLoading(false);
-                    setImageError(true);
-                  }}
-                />
+                <div
+                  className={cn(imageLoading ? 'hidden' : 'block', 'relative w-full max-h-[400px]')}
+                >
+                  <Image
+                    src={message.imageUrl!}
+                    alt={message.promt || 'Generated image'}
+                    width={800}
+                    height={400}
+                    className="rounded-lg object-contain w-full h-auto max-h-[400px]"
+                    onLoadingComplete={() => setImageLoading(false)}
+                    onError={() => {
+                      setImageLoading(false);
+                      setImageError(true);
+                    }}
+                  />
+                </div>
               )}
 
               {imageError && (

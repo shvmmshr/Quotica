@@ -80,7 +80,7 @@ export const CreditsProvider = ({ children }: { children: React.ReactNode }) => 
 
   useEffect(() => {
     fetchCredits();
-  }, [user]);
+  });
 
   return (
     <CreditsContext.Provider

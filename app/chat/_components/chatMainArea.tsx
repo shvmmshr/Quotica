@@ -98,10 +98,13 @@ export default function ChatMainArea({
     if (!content.trim() || !currentChat) return;
 
     // Find the selected option from all model options
+    console.log('Selected Option ID:', selectedOptionId);
     const selectedOption =
       Object.values(modelOptions)
         .flat()
         .find((option) => option.id === selectedOptionId) || modelOptions.bot[0];
+
+    console.log('Selected Option:', selectedOption);
 
     // Create a temporary message object
     const tempMessage: Message = {
@@ -130,9 +133,13 @@ export default function ChatMainArea({
 
       // Construct API endpoint with all necessary parameters
       const endpoint =
-        `/api/${selectedOption.id.includes('dalle') ? 'dalle' : 'bot'}/${
-          currentChat.id
-        }/image/stream?content=${encodeURIComponent(content)}` +
+        `/api/${
+          selectedOption.id.includes('gemini')
+            ? 'gemini'
+            : selectedOption.id.includes('dalle')
+              ? 'dalle'
+              : 'bot'
+        }/${currentChat.id}/image/stream?content=${encodeURIComponent(content)}` +
         `&model=${encodeURIComponent(selectedOption.name)}` +
         `&quality=${selectedOption.quality || 'standard'}` +
         `&size=${selectedOption.size || '1024x1024'}`;
@@ -227,6 +234,7 @@ export default function ChatMainArea({
           clerkId: currentChat.userId,
           content: prompt,
           imageUrl: imageKitUrl,
+          createdAt: new Date().toISOString(),
         }),
       });
 
@@ -299,6 +307,101 @@ export default function ChatMainArea({
     }
   };
 
+  const handleSendImageGemini = async (
+    imageBase64: string,
+    prompt: string,
+    selectedOptionId: string,
+    imagefileType: string
+  ) => {
+    if (!currentChat) return;
+
+    const selectedOption =
+      Object.values(modelOptions)
+        .flat()
+        .find((option) => option.id === selectedOptionId) || modelOptions.gemini?.[0];
+
+    const tempMessage: Message = {
+      id: uuid(),
+      chatSessionId: currentChat.id,
+      imageUrl: imageBase64 || undefined,
+      role: 'user',
+      content: prompt,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prevMessages) => [...prevMessages, tempMessage]);
+    setIsGeneratingImage(true);
+
+    try {
+      let imageKitUrl = '';
+      if (imageBase64 !== '') {
+        const fileName = `upload_${uuid()}.png`;
+        const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageUrl: imageBase64,
+            fileName,
+            sessionId: currentChat.id,
+          }),
+        });
+        if (!uploadResponse.ok) throw new Error('Failed to upload image to ImageKit');
+        const resp = await uploadResponse.json();
+        imageKitUrl = resp.url;
+      }
+
+      await fetch(`/api/chat/${currentChat.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clerkId: currentChat.userId,
+          content: prompt,
+          imageUrl: imageKitUrl,
+          role: 'user',
+        }),
+      });
+      const response = await fetch(`/api/gemini/${currentChat.id}/image/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: imageBase64 || '',
+          imagefileType,
+          content: prompt,
+          model: selectedOption.name,
+        }),
+      });
+
+      const result = await response.json();
+
+      setIsGeneratingImage(false);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: uuid(),
+          chatSessionId: currentChat.id,
+          imageUrl: result.imageUrl || undefined,
+          promt: prompt,
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+
+      await deductCredits(selectedOption.credits);
+    } catch (error) {
+      setIsGeneratingImage(false);
+      console.error('Error processing image with Gemini:', error);
+
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
+      );
+    }
+  };
+
   return (
     <div className="h-full w-full bg-background/60 backdrop-blur-sm flex flex-col">
       {currentChat ? (
@@ -324,6 +427,7 @@ export default function ChatMainArea({
               onSendMessage={handleSendMessage}
               onSendImage={handleSendImage}
               isMobile={isMobile}
+              onSendImageGemini={handleSendImageGemini}
             />
           </div>
         </>
