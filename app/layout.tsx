@@ -33,7 +33,13 @@ export default function RootLayout({
       <CreditsProvider>
         <html lang="en" suppressHydrationWarning>
           <body className={inter.className}>
-            <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <ThemeProvider 
+              attribute="class" 
+              defaultTheme="system" 
+              enableSystem 
+              enableColorScheme={false}
+              disableTransitionOnChange
+            >
               <Header /> {/* Use the Header component */}
               {children}
               <Toaster />

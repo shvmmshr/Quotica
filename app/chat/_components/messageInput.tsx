@@ -169,6 +169,7 @@ export default function MessageInput({
             <button
               onClick={clearImage}
               className="absolute top-1 right-1 p-0.5 rounded-full bg-background/80 hover:bg-background transition-colors"
+              title="Remove image"
             >
               <XIcon size={14} />
             </button>
@@ -186,6 +187,8 @@ export default function MessageInput({
             ref={fileInputRef}
             onChange={handleImageUpload}
             accept="image/*"
+            aria-label="Upload image"
+            title="Upload image"
             className="hidden"
             disabled={isProcessing}
           />
