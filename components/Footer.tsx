@@ -4,7 +4,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Github, MonitorIcon, Moon, Send, Sun, Twitter } from 'lucide-react';
 import { useTheme } from 'next-themes';
