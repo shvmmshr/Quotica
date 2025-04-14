@@ -4,10 +4,8 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Github, Moon, Send, Sun, Twitter } from 'lucide-react';
+import { Github, MonitorIcon, Moon, Send, Sun, Twitter } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Pacifico } from 'next/font/google';
 
@@ -18,17 +16,25 @@ const pacifico = Pacifico({
 });
 
 export default function Footer() {
-  const { theme, setTheme } = useTheme();
-  const [isDarkMode, setIsDarkMode] = React.useState(theme === 'dark');
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const currentYear = new Date().getFullYear();
+  const [mounted, setMounted] = React.useState(false);
 
+  // After mounting, we have access to the theme
   React.useEffect(() => {
-    setIsDarkMode(theme === 'dark');
-  }, [theme]);
+    setMounted(true);
+  }, []);
 
-  const handleThemeChange = (checked: boolean) => {
-    setIsDarkMode(checked);
-    setTheme(checked ? 'dark' : 'light');
+  // Helper function to determine system button highlighting
+  const getSystemButtonClass = () => {
+    if (!mounted) return '';
+    
+    if (theme === 'system') {
+      // If system theme is active, style it based on the resolved theme
+      return resolvedTheme === 'light' ? 'bg-white/20' : 'bg-white';
+    }
+    
+    return '';
   };
 
   return (
@@ -131,13 +137,70 @@ export default function Footer() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="flex items-center space-x-2">
-              <Sun className="h-4 w-4" />
-              <Switch id="dark-mode" checked={isDarkMode} onCheckedChange={handleThemeChange} />
-              <Moon className="h-4 w-4" />
-              <Label htmlFor="dark-mode" className="sr-only">
-                Toggle dark mode
-              </Label>
+            
+            {/* Theme Toggle - Compact Version */}
+            <div className="flex items-center justify-start">
+              <div className="flex items-center justify-between rounded-full bg-black/80 dark:bg-white/80 p-1 gap-[2px] backdrop-blur-sm">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`rounded-full h-8 w-8 ${getSystemButtonClass()} cursor-pointer hover:bg-white/30 dark:hover:bg-white`}
+                        onClick={() => setTheme('system')}
+                        suppressHydrationWarning
+                      >
+                        <MonitorIcon className="h-4 w-4 text-gray-200 dark:text-gray-800" />
+                        <span className="sr-only">System Theme</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>System</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`rounded-full h-8 w-8 ${mounted && theme === 'light' ? 'bg-white/20' : ''} cursor-pointer hover:bg-white/30 dark:hover:bg-white`}
+                        onClick={() => setTheme('light')}
+                        suppressHydrationWarning
+                      >
+                        <Sun className="h-4 w-4 text-gray-200 dark:text-gray-800" />
+                        <span className="sr-only">Light Mode</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Light</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`rounded-full h-8 w-8 ${mounted && theme === 'dark' ? 'bg-white' : ''} cursor-pointer hover:bg-white/30 dark:hover:bg-white`}
+                        onClick={() => setTheme('dark')}
+                        suppressHydrationWarning
+                      >
+                        <Moon className="h-4 w-4 text-gray-200 dark:text-gray-800" />
+                        <span className="sr-only">Dark Mode</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Dark</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
         </div>

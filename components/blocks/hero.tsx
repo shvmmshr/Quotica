@@ -51,17 +51,19 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               <div className="absolute top-0 z-50 h-48 w-screen bg-transparent opacity-10 backdrop-blur-md" />
             )}
 
+           
             {/* Main glow */}
-            <div className="absolute inset-auto z-50 h-36 w-[28rem] -translate-y-[-30%] rounded-full bg-primary/60 opacity-80 blur-3xl" />
+            <div className="absolute inset-auto z-50 dark:h-36 h-20 w-[28rem] -translate-y-[-30%] rounded-full dark:bg-primary/60 bg-[#ecd1ff] opacity-80 blur-3xl" />
 
             {/* Lamp effect */}
             <motion.div
               initial={{ width: '8rem' }}
               viewport={{ once: true }}
               transition={{ ease: 'easeInOut', delay: 0.3, duration: 0.8 }}
-              whileInView={{ width: '16rem' }}
-              className="absolute top-0 z-30 h-36 -translate-y-[20%] rounded-full bg-primary/60 blur-2xl"
+              whileInView={{ width: '20rem' }}
+              className="absolute top-0 z-30 dark:h-36 h-20 -translate-y-[20%] rounded-full dark:bg-primary/60 bg-[#9500ff] blur-3xl dark:blur-2xl"
             />
+    
 
             {/* Top line */}
             <motion.div
@@ -69,7 +71,7 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               viewport={{ once: true }}
               transition={{ ease: 'easeInOut', delay: 0.3, duration: 0.8 }}
               whileInView={{ width: '30rem' }}
-              className="absolute inset-auto z-50 h-0.5 -translate-y-[-10%] bg-primary/60"
+              className="absolute inset-auto z-50 h-0.5 -translate-y-[-10%] bg-[#6900b5]/70 dark:bg-primary/60"
             />
 
             {/* Left gradient cone */}

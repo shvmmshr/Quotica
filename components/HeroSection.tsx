@@ -68,7 +68,7 @@ const HeroSection: React.FC = () => {
       <Hero
         title={
           <div className="flex flex-col items-center gap-2">
-            <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 dark:from-primary dark:to-blue-400">
+            <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#480277] to-[#9900ff] dark:from-primary dark:via-blue-200 dark:to-blue-400 leading-tight">
               Transform Your Thoughts
             </h1>
             <h1>Into Beautiful Images</h1>
