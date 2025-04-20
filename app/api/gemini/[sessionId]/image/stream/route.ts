@@ -15,11 +15,11 @@ export async function POST(
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
-    let contents = content;
+    let argContents = content;
 
     if (image && image !== '') {
       const base64Data = image.split(',')[1];
-      contents = [
+      argContents = [
         { text: content },
         {
           inlineData: {
@@ -34,7 +34,7 @@ export async function POST(
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
     const geminiResponse = await ai.models.generateContent({
       model: 'gemini-2.0-flash-exp-image-generation',
-      contents: contents,
+      contents: argContents,
       config: {
         responseModalities: ['Text', 'Image'],
       },
