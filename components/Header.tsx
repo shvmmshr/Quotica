@@ -100,9 +100,9 @@ export default function Header() {
         <div className="container mx-auto flex items-center justify-between h-16 px-4 py-2 md:px-6 max-w-7xl relative">
           <div className="flex items-center gap-8">
             <Link href="/" className="relative group">
-              <div className="absolute -inset-1 rounded-full blur opacity-25 bg-gradient-to-r from-primary to-purple-500 group-hover:opacity-40 transition duration-300"></div>
+              <div className="absolute -inset-1 rounded-full blur opacity-25 bg-gradient-to-r from-[#726CF8] to-[#E975A8] dark:from-primary dark:to-white/50 group-hover:opacity-35 transition duration-300"></div>
               <span
-                className={`relative text-2xl ${pacifico.className} text-foreground bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 dark:from-primary dark:to-blue-400`}
+                className={`relative text-2xl ${pacifico.className} text-foreground bg-clip-text text-transparent bg-gradient-to-r from-[#003776] to-[#b143ff] dark:from-primary dark:to-blue-400`}
               >
                 Quotica
               </span>
@@ -238,12 +238,12 @@ export default function Header() {
             <SignedOut>
               <div className="hidden md:flex items-center gap-2">
                 <SignInButton>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className='cursor-pointer'>
                     Sign In
                   </Button>
                 </SignInButton>
                 <SignUpButton>
-                  <Button size="sm" className="bg-primary hover:bg-primary/90">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 cursor-pointer">
                     Sign Up
                   </Button>
                 </SignUpButton>
