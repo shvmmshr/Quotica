@@ -11,12 +11,11 @@ import Image from 'next/image';
 
 interface MessageInputProps {
   onSendMessage: (text: string, model: string) => void;
-  onSendImage: (imageFile: string, userPrompt: string, model: string) => void;
-  onSendImageGemini: (
+  onSendImage: (
     imageFile: string,
     userPrompt: string,
     model: string,
-    imagefileType: string
+    imagefileType?: string
   ) => void;
   isMobile?: boolean;
 }
@@ -25,11 +24,10 @@ export default function MessageInput({
   onSendMessage,
   onSendImage,
   isMobile = false,
-  onSendImageGemini,
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
-  const [selectedOption, setSelectedOption] = useState(modelOptions.bot[0].id);
+  const [selectedOption, setSelectedOption] = useState(modelOptions.gemini[0].id);
   const [showOptions, setShowOptions] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -66,18 +64,9 @@ export default function MessageInput({
         reader.onload = async (event) => {
           const base64String = event.target?.result as string;
           clearImage();
-          if (
-            modelOptions[selectedModel as keyof typeof modelOptions].find(
-              (opt) => opt.id === selectedOption
-            )?.id === 'gemini'
-          ) {
-            await onSendImageGemini(base64String, message, selectedOption, imageFile.type);
-          } else {
-            await onSendImage(base64String, message, selectedOption);
-          }
+          // Unified image handling for all model types (now including gptImage)
+          await onSendImage(base64String, message, selectedOption, imageFile.type);
           toast.success('Image processed');
-          // Clear both image and text input after successful send
-
           setMessage('');
           setIsProcessing(false);
         };
@@ -92,16 +81,8 @@ export default function MessageInput({
         setIsProcessing(false);
       }
     } else {
-      if (
-        modelOptions[selectedModel as keyof typeof modelOptions].find(
-          (opt) => opt.id === selectedOption
-        )?.id === 'gemini'
-      ) {
-        onSendImageGemini('', message, selectedOption, '');
-      } else {
-        onSendMessage(message, selectedOption);
-      }
-
+      // Text-only messages
+      onSendMessage(message, selectedOption);
       setMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';

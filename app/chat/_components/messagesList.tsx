@@ -68,7 +68,7 @@ const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
                         <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-4 border-gray-300 border-t-primary"></div>
                       </div>
                       <p className="text-center text-xs sm:text-sm text-muted-foreground mt-2">
-                        Generating your quote image...
+                        Generating your image...
                       </p>
                     </div>
                   </div>
