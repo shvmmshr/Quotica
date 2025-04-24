@@ -28,12 +28,12 @@ export default function Footer() {
   // Helper function to determine system button highlighting
   const getSystemButtonClass = () => {
     if (!mounted) return '';
-    
+
     if (theme === 'system') {
       // If system theme is active, style it based on the resolved theme
       return resolvedTheme === 'light' ? 'bg-white/20' : 'bg-white';
     }
-    
+
     return '';
   };
 
@@ -107,7 +107,7 @@ export default function Footer() {
                       variant="outline"
                       size="icon"
                       className="rounded-full"
-                      onClick={() => window.open('https://github.com/quotica', '_blank')}
+                      onClick={() => window.open('https://github.com/shvmmshr/quotica', '_blank')}
                     >
                       <Github className="h-4 w-4" />
                       <span className="sr-only">GitHub</span>
@@ -125,7 +125,7 @@ export default function Footer() {
                       variant="outline"
                       size="icon"
                       className="rounded-full"
-                      onClick={() => window.open('https://twitter.com/quotica_app', '_blank')}
+                      onClick={() => window.open('https://twitter.com/prybruhta', '_blank')}
                     >
                       <Twitter className="h-4 w-4" />
                       <span className="sr-only">Twitter</span>
@@ -137,7 +137,7 @@ export default function Footer() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            
+
             {/* Theme Toggle - Compact Version */}
             <div className="flex items-center justify-start">
               <div className="flex items-center justify-between rounded-full bg-black/80 dark:bg-white/80 p-1 gap-[2px] backdrop-blur-sm">
