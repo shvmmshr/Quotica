@@ -32,15 +32,15 @@ export function MembershipDialog({ open, onOpenChange }: MembershipDialogProps) 
 
   // Calculate credits with bonus
   const calculateCredits = (dollars: number) => {
-    const baseCredits = dollars * 10;
+    const baseCredits = dollars * 100;
     let bonusPercentage = 0;
 
     if (dollars >= 5 && dollars < 10) {
-      bonusPercentage = 10;
+      bonusPercentage = 100;
     } else if (dollars >= 10 && dollars <= 20) {
-      bonusPercentage = 15;
+      bonusPercentage = 150;
     } else if (dollars > 20 && dollars <= 50) {
-      bonusPercentage = 20;
+      bonusPercentage = 200;
     }
 
     const bonusCredits = Math.round(baseCredits * (bonusPercentage / 100));

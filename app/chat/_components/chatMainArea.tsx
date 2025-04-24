@@ -98,13 +98,10 @@ export default function ChatMainArea({
     if (!content.trim() || !currentChat) return;
 
     // Find the selected option from all model options
-    console.log('Selected Option ID:', selectedOptionId);
     const selectedOption =
       Object.values(modelOptions)
         .flat()
         .find((option) => option.id === selectedOptionId) || modelOptions.bot[0];
-
-    console.log('Selected Option:', selectedOption);
 
     // Create a temporary message object
     const tempMessage: Message = {
@@ -117,9 +114,10 @@ export default function ChatMainArea({
 
     // Optimistically update UI (add user message)
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
+    setIsGeneratingImage(true); // Set loading state
 
     try {
-      // Send to chat API with model options
+      // Send user message to chat API
       await fetch(`/api/chat/${currentChat.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,48 +127,45 @@ export default function ChatMainArea({
         }),
       });
 
-      setIsGeneratingImage(true); // Set loading state
+      // Determine which API endpoint to use based on the model
+      const modelType = selectedOption.id.includes('gemini')
+        ? 'gemini'
+        : selectedOption.id.includes('gptImage')
+          ? 'gptImage'
+          : 'bot';
 
-      // Construct API endpoint with all necessary parameters
-      const endpoint =
-        `/api/${
-          selectedOption.id.includes('gemini')
-            ? 'gemini'
-            : selectedOption.id.includes('dalle')
-              ? 'dalle'
-              : 'bot'
-        }/${currentChat.id}/image/stream?content=${encodeURIComponent(content)}` +
-        `&model=${encodeURIComponent(selectedOption.name)}` +
-        `&quality=${selectedOption.quality || 'standard'}` +
-        `&size=${selectedOption.size || '1024x1024'}`;
+      // Send POST request to generate image
+      const response = await fetch(`/api/${modelType}/${currentChat.id}/image`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: content,
+          model: selectedOption.name,
+          quality: selectedOption.quality || 'standard',
+          size: selectedOption.size || '1024x1024',
+        }),
+      });
 
-      const eventSource = new EventSource(endpoint);
+      if (!response.ok) {
+        throw new Error(`Failed to generate image: ${response.statusText}`);
+      }
 
-      eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setIsGeneratingImage(false); // Clear loading state
+      const result = await response.json();
+      setIsGeneratingImage(false); // Clear loading state
 
-        // Append AI response without removing user message
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: uuid(),
-            chatSessionId: currentChat.id,
-            imageUrl: data.imageUrl,
-            promt: content,
-            role: 'assistant',
-            createdAt: new Date().toISOString(),
-          },
-        ]);
+      // Add AI response to messages
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: uuid(),
+          chatSessionId: currentChat.id,
+          imageUrl: result.imageUrl,
+          promt: content,
+          role: 'assistant',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
 
-        eventSource.close();
-      };
-
-      eventSource.onerror = () => {
-        setIsGeneratingImage(false); // Clear loading state on error
-        console.error('SSE Error');
-        eventSource.close();
-      };
       try {
         await deductCredits(selectedOption.credits);
       } catch (creditError) {
@@ -187,8 +182,14 @@ export default function ChatMainArea({
     }
   };
 
-  const handleSendImage = async (imageBase64: string, prompt: string, selectedOptionId: string) => {
-    if (!imageBase64 || !currentChat) return;
+  const handleSendImage = async (
+    imageBase64: string,
+    prompt: string,
+    selectedOptionId: string,
+    imageFileType: string = ''
+  ) => {
+    if (!currentChat) return;
+    if (!imageBase64 && !prompt.trim()) return;
 
     // Find the selected option from all model options
     const selectedOption =
@@ -196,145 +197,24 @@ export default function ChatMainArea({
         .flat()
         .find((option) => option.id === selectedOptionId) || modelOptions.bot[0];
 
-    // Create a temporary message object for the image
-    const tempMessage: Message = {
-      id: uuid(),
-      chatSessionId: currentChat.id,
-      imageUrl: imageBase64, // Temporary base64 URL for preview
-      role: 'user',
-      content: prompt,
-      createdAt: new Date().toISOString(),
-    };
-
-    // Optimistically update UI (add user message with image)
-    setMessages((prevMessages) => [...prevMessages, tempMessage]);
-
-    try {
-      setIsGeneratingImage(true);
-
-      // 1. First upload the original image to ImageKit
-      const fileName = `upload_${uuid()}.png`;
-      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageUrl: imageBase64,
-          fileName,
-          sessionId: currentChat.id,
-        }),
-      });
-
-      if (!uploadResponse.ok) throw new Error('Failed to upload image to ImageKit');
-      const { url: imageKitUrl } = await uploadResponse.json();
-
-      await fetch(`/api/chat/${currentChat.id}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clerkId: currentChat.userId,
-          content: prompt,
-          imageUrl: imageKitUrl,
-          createdAt: new Date().toISOString(),
-        }),
-      });
-
-      // 2. Send to GPT-4 Turbo for analysis
-      // const gptResponse = await fetch('/api/analyseImage', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     imageUrl: imageKitUrl,
-      //     prompt, // Optional user prompt
-      //   }),
-      // });
-
-      // if (!gptResponse.ok) throw new Error('Failed to analyze image');
-      // const { description } = await gptResponse.json();
-      const description = 'Generated image description';
-
-      // 3. Combine description with user prompt (if any)
-      const combinedPrompt = prompt ? `${description} ${prompt}` : description;
-
-      // 4. Generate new image with DALL-E (backend handles upload)
-      const endpoint =
-        `/api/${selectedOption.id.includes('dalle') ? 'dalle' : 'bot'}/${currentChat.id}/image/stream?content=${encodeURIComponent(combinedPrompt)}` +
-        `&model=${encodeURIComponent(selectedOption.name)}` +
-        `&quality=${selectedOption.quality || 'standard'}` +
-        `&size=${selectedOption.size || '1024x1024'}`;
-
-      const eventSource = new EventSource(endpoint);
-
-      eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setIsGeneratingImage(false);
-
-        // Backend now returns the final ImageKit URL directly
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: uuid(),
-            chatSessionId: currentChat.id,
-            imageUrl: data.imageUrl, // Final ImageKit URL from backend
-            promt: combinedPrompt, // Store the prompt used for generation
-            role: 'assistant',
-            createdAt: new Date().toISOString(),
-          },
-        ]);
-
-        // Backend also handles storing in ImageGeneration collection
-        eventSource.close();
-      };
-
-      eventSource.onerror = () => {
-        setIsGeneratingImage(false);
-        console.error('SSE Error');
-        eventSource.close();
-      };
-
-      try {
-        await deductCredits(selectedOption.credits);
-      } catch (creditError) {
-        console.error('Failed to deduct credits:', creditError);
-      }
-    } catch (error) {
-      setIsGeneratingImage(false);
-      console.error('Error processing image:', error);
-
-      // Mark message as failed
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
-      );
-    }
-  };
-
-  const handleSendImageGemini = async (
-    imageBase64: string,
-    prompt: string,
-    selectedOptionId: string,
-    imagefileType: string
-  ) => {
-    if (!currentChat) return;
-
-    const selectedOption =
-      Object.values(modelOptions)
-        .flat()
-        .find((option) => option.id === selectedOptionId) || modelOptions.gemini?.[0];
-
+    // Create a temporary message object for the image/prompt
     const tempMessage: Message = {
       id: uuid(),
       chatSessionId: currentChat.id,
       imageUrl: imageBase64 || undefined,
-      role: 'user',
       content: prompt,
+      role: 'user',
       createdAt: new Date().toISOString(),
     };
 
+    // Optimistically update UI (add user message)
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
     setIsGeneratingImage(true);
 
     try {
+      // Handle image upload if an image is present
       let imageKitUrl = '';
-      if (imageBase64 !== '') {
+      if (imageBase64) {
         const fileName = `upload_${uuid()}.png`;
         const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
           method: 'POST',
@@ -345,11 +225,13 @@ export default function ChatMainArea({
             sessionId: currentChat.id,
           }),
         });
+
         if (!uploadResponse.ok) throw new Error('Failed to upload image to ImageKit');
-        const resp = await uploadResponse.json();
-        imageKitUrl = resp.url;
+        const { url } = await uploadResponse.json();
+        imageKitUrl = url;
       }
 
+      // Save the user message to the chat history
       await fetch(`/api/chat/${currentChat.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -360,45 +242,87 @@ export default function ChatMainArea({
           role: 'user',
         }),
       });
-      const response = await fetch(`/api/gemini/${currentChat.id}/image/stream`, {
+
+      // Determine which model to use and call the appropriate API
+      const modelType = selectedOption.id.includes('gemini')
+        ? 'gemini'
+        : selectedOption.id.includes('gptImage')
+          ? 'gptImage'
+          : 'bot';
+
+      // Construct request body based on model type
+      const requestBody = {
+        content: prompt,
+        model: selectedOption.name,
+        quality: selectedOption.quality || 'standard',
+        size: selectedOption.size || '1024x1024',
+      };
+
+      // Add image data if present - now for both Gemini and GPT Image models
+      if (imageBase64 && (modelType === 'gemini' || modelType === 'gptImage')) {
+        Object.assign(requestBody, {
+          image: imageBase64,
+          imagefileType: imageFileType || 'image/png',
+        });
+      }
+
+      // Determine the endpoint based on whether this is an edit or a generation
+      const endpoint =
+        imageBase64 && modelType === 'gptImage'
+          ? `/api/${modelType}/${currentChat.id}/edit`
+          : `/api/${modelType}/${currentChat.id}/image`;
+
+      // Make API request
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image: imageBase64 || '',
-          imagefileType,
-          content: prompt,
-          model: selectedOption.name,
-        }),
+        body: JSON.stringify(
+          endpoint.includes('/edit')
+            ? {
+                prompt,
+                imageBase64,
+                quality: selectedOption.quality || 'standard',
+                size: selectedOption.size || '1024x1024',
+              }
+            : requestBody
+        ),
       });
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(`Failed to generate image: ${response.statusText}`);
+      }
 
-      setIsGeneratingImage(false);
+      const result = await response.json();
 
       if (result.error) {
         throw new Error(result.error);
       }
 
+      // Add AI response to message list
       setMessages((prevMessages) => [
         ...prevMessages,
         {
           id: uuid(),
           chatSessionId: currentChat.id,
           imageUrl: result.imageUrl || undefined,
+          content: result.content || undefined,
           promt: prompt,
           role: 'assistant',
           createdAt: new Date().toISOString(),
         },
       ]);
+      setIsGeneratingImage(false);
 
+      // Deduct credits for the operation
       await deductCredits(selectedOption.credits);
     } catch (error) {
-      setIsGeneratingImage(false);
-      console.error('Error processing image with Gemini:', error);
+      console.error('Error processing image:', error);
 
+      // Mark message as failed
       setMessages((prevMessages) =>
         prevMessages.map((msg) => (msg.id === tempMessage.id ? { ...msg, error: true } : msg))
       );
+      setIsGeneratingImage(false);
     }
   };
 
@@ -427,7 +351,6 @@ export default function ChatMainArea({
               onSendMessage={handleSendMessage}
               onSendImage={handleSendImage}
               isMobile={isMobile}
-              onSendImageGemini={handleSendImageGemini}
             />
           </div>
         </>

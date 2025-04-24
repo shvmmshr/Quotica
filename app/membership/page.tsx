@@ -1,12 +1,12 @@
-"use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useCheckout } from "@/lib/checkoutDodo";
-import { useUser } from "@clerk/nextjs";
+'use client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useCheckout } from '@/lib/checkoutDodo';
+import { useUser } from '@clerk/nextjs';
 // import { use } from "react";
-import { productsMap } from "@/data/productInfo";
-import { useState } from "react";
-import { Slider } from "@/components/ui/slider";
+import { productsMap } from '@/data/productInfo';
+import { useState } from 'react';
+import { Slider } from '@/components/ui/slider';
 
 type Product = {
   product_id: string;
@@ -20,16 +20,16 @@ export default function SubscriptionPage() {
   const { user } = useUser();
   const userId = user?.id;
   const email = user?.primaryEmailAddress?.emailAddress;
-  const fullName = user?.fullName || "";
+  const fullName = user?.fullName || '';
   const { checkoutProduct } = useCheckout();
-  const type = "creditsRecharge";
+  const type = 'creditsRecharge';
   const { productId, productName } = productsMap[type];
 
   const [amount, setAmount] = useState(2);
 
   // Calculate credits with bonus
   const calculateCredits = (dollars: number) => {
-    const baseCredits = dollars * 10;
+    const baseCredits = dollars * 100;
     let bonusPercentage = 0;
 
     if (dollars >= 5 && dollars < 10) {
@@ -66,7 +66,7 @@ export default function SubscriptionPage() {
 
       await checkoutProduct(product, true, amount * 100, credits); // Convert to cents
     } catch (error) {
-      console.error("Error during checkout:", error);
+      console.error('Error during checkout:', error);
     }
   };
   return (
@@ -103,21 +103,14 @@ export default function SubscriptionPage() {
               </p>
               {creditDetails.bonusCredits > 0 && (
                 <p>
-                  <strong>
-                    Bonus Credits ({creditDetails.bonusPercentage}%):
-                  </strong>{" "}
+                  <strong>Bonus Credits ({creditDetails.bonusPercentage}%):</strong>{' '}
                   {creditDetails.bonusCredits}
                 </p>
               )}
-              <p className="font-bold mt-1">
-                Total: {creditDetails.totalCredits} credits
-              </p>
+              <p className="font-bold mt-1">Total: {creditDetails.totalCredits} credits</p>
             </div>
 
-            <Button
-              className="w-full bg-green-500 hover:bg-green-600"
-              onClick={handlePayment}
-            >
+            <Button className="w-full bg-green-500 hover:bg-green-600" onClick={handlePayment}>
               Purchase ${amount} ({creditDetails.totalCredits} credits)
             </Button>
           </CardContent>
