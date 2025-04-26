@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+
 interface HeroProps {
   className?: string;
   gradient?: boolean;
@@ -13,13 +14,15 @@ interface HeroProps {
   subtitleClassName?: string;
   actionsClassName?: string;
   title: React.ReactNode;
-  subtitle: string;
+  subtitle: React.ReactNode;
   actions: {
-    label: string;
+    label?: string;
+    Label?: React.ReactNode;
     href: string;
-    variant: 'default' | 'outline';
+    variant?: 'default' | 'outline' | 'custom';
   }[];
 }
+
 const Hero = React.forwardRef<HTMLElement, HeroProps>(
   (
     {
@@ -51,7 +54,6 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               <div className="absolute top-0 z-50 h-48 w-screen bg-transparent opacity-10 backdrop-blur-md" />
             )}
 
-           
             {/* Main glow */}
             <div className="absolute inset-auto z-50 dark:h-36 h-20 w-[28rem] -translate-y-[-30%] rounded-full dark:bg-primary/60 bg-[#ecd1ff] opacity-80 blur-3xl" />
 
@@ -63,7 +65,6 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               whileInView={{ width: '20rem' }}
               className="absolute top-0 z-30 dark:h-36 h-20 -translate-y-[20%] rounded-full dark:bg-primary/60 bg-[#9500ff] blur-3xl dark:blur-2xl"
             />
-    
 
             {/* Top line */}
             <motion.div
@@ -129,15 +130,23 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(
               {title}
             </h1>
             {subtitle && (
-              <p className={cn('text-xl text-muted-foreground', subtitleClassName)}>{subtitle}</p>
+              <div className={cn('text-xl text-muted-foreground', subtitleClassName)}>
+                {subtitle}
+              </div>
             )}
             {actions && actions.length > 0 && (
               <div className={cn('flex gap-4', actionsClassName)}>
-                {actions.map((action, index) => (
-                  <Button key={index} variant={action.variant || 'default'} asChild>
-                    <Link href={action.href}>{action.label}</Link>
-                  </Button>
-                ))}
+                {actions.map((action, index) =>
+                  action.variant === 'custom' ? (
+                    <div key={index}>
+                      <Link href={action.href}>{action.Label}</Link>
+                    </div>
+                  ) : (
+                    <Button key={index} variant={action.variant || 'default'} asChild>
+                      <Link href={action.href}>{action.label}</Link>
+                    </Button>
+                  )
+                )}
               </div>
             )}
           </div>

@@ -1,21 +1,50 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence, useInView } from 'framer-motion';
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from './ui/button';
-import { ArrowRight, Image as ImageIcon, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Image as ImageIcon,
+  Sparkles,
+  MousePointerClick,
+  ChevronDown,
+  PenTool,
+  Layout,
+  Lightbulb,
+} from 'lucide-react';
 import Lenis from 'lenis';
 import { Hero } from './blocks/hero';
+// import Image from 'next/image';
 
 const HeroSection: React.FC = () => {
-  // Initialize Lenis for smooth scrolling
+  const targetRef = useRef<HTMLDivElement>(null);
+  const thoughtsRef = useRef<HTMLDivElement>(null);
+  const adsRef = useRef<HTMLDivElement>(null);
+  const isThoughtsInView = useInView(thoughtsRef, { once: false, amount: 0.3 });
+  const isAdsInView = useInView(adsRef, { once: false, amount: 0.3 });
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.3], [1, 0.9]);
+  const y = useTransform(scrollYProgress, [0, 0.3], [0, 70]);
+
+  // Initialize Lenis for smooth scrolling with optimized settings
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1, // Reduced for better performance
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 0.8, // Lower for smoother performance
+      syncTouch: true,
     });
 
     function raf(time: number) {
@@ -25,19 +54,32 @@ const HeroSection: React.FC = () => {
 
     requestAnimationFrame(raf);
 
+    // Hide scroll indicator after 5 seconds
+    const timer = setTimeout(() => {
+      setShowScrollIndicator(false);
+    }, 5000);
+
     return () => {
       // Clean up
       lenis.destroy();
+      clearTimeout(timer);
     };
   }, []);
 
+  const handleScrollDown = () => {
+    const thoughtsSection = document.getElementById('thoughts-section');
+    if (thoughtsSection) {
+      thoughtsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6 },
+      transition: { duration: 0.5, ease: 'easeOut' },
     },
   };
 
@@ -46,149 +88,549 @@ const HeroSection: React.FC = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.15,
       },
     },
   };
 
-  const featureVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
+  // const featureVariants = {
+  //   hidden: { opacity: 0, y: 30 },
+  //   visible: {
+  //     opacity: 1,
+  //     y: 0,
+  //     transition: {
+  //       duration: 0.5,
+  //       ease: 'easeOut',
+  //     },
+  //   },
+  // };
+
+  const pulseAnimation = {
+    initial: { scale: 1 },
+    animate: {
+      scale: [1, 1.03, 1],
       transition: {
-        duration: 0.5,
-        ease: 'easeOut',
+        duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut',
       },
     },
   };
+
+  // Example images
+  const exampleImages = ['/example-1.jpg', '/example-2.jpg', '/example-3.jpg'];
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <Hero
-        title={
-          <div className="flex flex-col items-center gap-2">
-            <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#480277] to-[#9900ff] dark:from-primary dark:via-blue-200 dark:to-blue-400 leading-tight">
-              Transform Your Thoughts
-            </h1>
-            <h1>Into Beautiful Images</h1>
+    <div className="flex flex-col items-center w-full overflow-hidden">
+      <div ref={targetRef} className="w-full">
+        {/* Scroll indicator */}
+        <AnimatePresence>
+          {showScrollIndicator && (
+            <motion.div
+              className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 flex flex-col items-center gap-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 2, duration: 0.6 }}
+              onClick={handleScrollDown}
+            >
+              <span className="text-sm text-muted-foreground">Scroll Down</span>
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <ChevronDown className="h-6 w-6 text-primary cursor-pointer" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Parallax effect on hero section */}
+        <motion.div style={{ opacity, scale, y }} className="w-full will-change-transform">
+          {/* Hero Background with animated gradient */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-10 left-0 w-full h-full">
+              <motion.div
+                className="w-1/2 h-1/2 bg-primary/10 rounded-full filter blur-3xl will-change-transform"
+                animate={{
+                  x: [0, 50, -30, 0],
+                  y: [0, -30, 50, 0],
+                }}
+                transition={{
+                  duration: 30, // Slower animation for less CPU usage
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+              <motion.div
+                className="absolute top-1/3 right-1/4 w-1/3 h-1/3 bg-purple-500/10 rounded-full filter blur-3xl will-change-transform"
+                animate={{
+                  x: [0, -40, 60, 0],
+                  y: [0, 60, -40, 0],
+                }}
+                transition={{
+                  duration: 28,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+              <motion.div
+                className="absolute bottom-1/4 left-1/3 w-1/4 h-1/4 bg-blue-500/10 rounded-full filter blur-3xl will-change-transform"
+                animate={{
+                  x: [0, 70, -50, 0],
+                  y: [0, -50, 70, 0],
+                }}
+                transition={{
+                  duration: 32,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+            </div>
           </div>
-        }
-        subtitle="Generate stunning, eye-catching images from your thoughts with just a few clicks. Perfect for social media, presentations, or any creative project."
-        actions={[
-          {
-            label: 'Chat Now',
-            href: '/chat',
-            variant: 'default',
-          },
-          {
-            label: 'View Pricing',
-            href: '#pricing',
-            variant: 'outline',
-          },
-        ]}
-      />
 
-      {/* Features Section */}
-      <div className="container mx-auto px-4 py-20 max-w-6xl">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={staggerChildren}
-          className="text-center mb-16"
-        >
-          <motion.h2 variants={fadeIn} className="text-3xl md:text-4xl font-bold mb-4">
-            Create Beautiful Quote Images with AI
-          </motion.h2>
-          <motion.p variants={fadeIn} className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Quotica uses advanced AI to generate stunning visuals that match your quotes perfectly.
-            Stand out on social media with images that capture attention.
-          </motion.p>
-        </motion.div>
+          <Hero
+            title={
+              <div className="flex flex-col items-center gap-2 relative">
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.12,
+                      },
+                    },
+                  }}
+                  className="flex flex-wrap justify-center"
+                >
+                  <motion.h1
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.5 },
+                      },
+                    }}
+                    className="text-center text-5xl sm:text-6xl md:text-7xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#480277] to-[#9900ff] dark:from-primary dark:via-blue-200 dark:to-blue-400 leading-tight"
+                  >
+                    Transform Your Thoughts
+                  </motion.h1>
+                </motion.div>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.12,
+                        delayChildren: 0.3,
+                      },
+                    },
+                  }}
+                  className="flex flex-wrap justify-center"
+                >
+                  <motion.h1
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.5 },
+                      },
+                    }}
+                    className="text-center text-5xl sm:text-6xl md:text-7xl font-bold"
+                  >
+                    Into Beautiful Images
+                  </motion.h1>
+                </motion.div>
 
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6"
-          variants={staggerChildren}
-        >
+                {/* Floating elements */}
+                <motion.div
+                  className="absolute -right-16 top-0 hidden md:block"
+                  animate={{
+                    y: [0, 10, 0],
+                    rotate: [0, 5, 0],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <Sparkles className="h-12 w-12 text-primary/30" />
+                </motion.div>
+                <motion.div
+                  className="absolute -left-14 bottom-2 hidden md:block"
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, -5, 0],
+                  }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 1,
+                  }}
+                >
+                  <MousePointerClick className="h-10 w-10 text-primary/30" />
+                </motion.div>
+              </div>
+            }
+            subtitle={
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="text-lg md:text-xl text-center max-w-3xl mx-auto leading-relaxed text-muted-foreground"
+              >
+                Generate stunning, eye-catching images and ads from your thoughts with just a few
+                clicks. Perfect for marketing, social media, presentations, or any creative project.
+              </motion.p>
+            }
+            actions={[
+              {
+                Label: (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.8, duration: 0.4 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      size="lg"
+                      className="gap-2 px-6 rounded-full bg-primary hover:bg-primary/90"
+                    >
+                      Chat Now <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                ),
+                href: '/chat',
+                variant: 'custom',
+              },
+              {
+                Label: (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.9, duration: 0.4 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button size="lg" variant="outline" className="gap-2 px-6 rounded-full">
+                      View Pricing
+                    </Button>
+                  </motion.div>
+                ),
+                href: '#pricing',
+                variant: 'custom',
+              },
+            ]}
+          />
+
+          {/* Example images */}
           <motion.div
-            className="bg-card p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-            variants={featureVariants}
-            whileHover={{
-              y: -5,
-              transition: { duration: 0.2 },
-            }}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1, duration: 0.6 }}
+            className="mt-16 mb-24 container max-w-6xl mx-auto px-4 flex justify-center items-center"
           >
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-300">
-              <ImageIcon className="h-6 w-6 text-primary" />
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              {exampleImages.map((src, index) => (
+                <motion.div
+                  key={index}
+                  className={`relative rounded-lg overflow-hidden shadow-lg ${
+                    index === 1 ? 'md:mt-10' : ''
+                  }`}
+                  variants={pulseAnimation}
+                  initial="initial"
+                  animate="animate"
+                  transition={{ delay: index * 0.5 }}
+                  whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+                >
+                  <div className="bg-card w-[300px] h-[200px] md:w-[320px] md:h-[220px] flex items-center justify-center rounded-lg">
+                    <div className="p-4 text-center">
+                      <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                        <ImageIcon className="h-8 w-8 text-primary/60" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Example image {index + 1}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            <h3 className="text-xl font-semibold mb-2">AI Image Generation</h3>
-            <p className="text-muted-foreground">
-              Turn your quotes into captivating images with our AI-powered generator. Create unique
-              visuals in seconds.
-            </p>
           </motion.div>
-
-          <motion.div
-            className="bg-card p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-            variants={featureVariants}
-            whileHover={{
-              y: -5,
-              transition: { duration: 0.2 },
-            }}
-          >
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-300">
-              <Sparkles className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Customizable Styles</h3>
-            <p className="text-muted-foreground">
-              Choose from a variety of styles, themes, and moods to match your brand or message
-              perfectly.
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="bg-card p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-            variants={featureVariants}
-            whileHover={{
-              y: -5,
-              transition: { duration: 0.2 },
-            }}
-          >
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-300">
-              <ArrowRight className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Instant Download</h3>
-            <p className="text-muted-foreground">
-              Generate and download high-quality images instantly. Ready for social media,
-              presentations, or any digital use.
-            </p>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeIn}
-          className="text-center mt-16"
-        >
-          <SignedIn>
-            <Link href="/chat">
-              <Button size="lg" className="rounded-full px-8">
-                Start Creating <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </SignedIn>
-          <SignedOut>
-            <SignInButton>
-              <Button size="lg" className="rounded-full px-8">
-                Sign In to Create <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </SignInButton>
-          </SignedOut>
         </motion.div>
       </div>
+
+      {/* Thoughts to Images Section */}
+      <section
+        id="thoughts-section"
+        ref={thoughtsRef}
+        className="w-full py-24 bg-gradient-to-b from-background to-primary/5"
+      >
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <motion.div
+              className="lg:w-1/2 order-2 lg:order-1"
+              initial="hidden"
+              animate={isThoughtsInView ? 'visible' : 'hidden'}
+              variants={staggerChildren}
+            >
+              <motion.div
+                variants={fadeInUp}
+                className="relative bg-card rounded-xl overflow-hidden shadow-xl p-2 border border-border/40"
+              >
+                <div className="rounded-lg aspect-video bg-card relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <PenTool className="h-10 w-10 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-semibold">Thoughts to Images Visualization</h3>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              className="lg:w-1/2 order-1 lg:order-2"
+              initial="hidden"
+              animate={isThoughtsInView ? 'visible' : 'hidden'}
+              variants={staggerChildren}
+            >
+              <motion.span
+                variants={fadeInUp}
+                className="text-sm font-semibold text-primary uppercase tracking-wider"
+              >
+                Effortless Creation
+              </motion.span>
+              <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold mt-2 mb-6">
+                From Your Thoughts to Stunning Images
+              </motion.h2>
+              <motion.p
+                variants={fadeInUp}
+                className="text-lg text-muted-foreground mb-6 leading-relaxed"
+              >
+                Just describe what you want in natural language, and our AI will transform your
+                thoughts into beautiful, professional-quality images. No design skills needed.
+              </motion.p>
+
+              <motion.div variants={staggerChildren} className="space-y-5">
+                <motion.div variants={fadeInUp} className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full mt-1">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Instant Visualization</h3>
+                    <p className="text-muted-foreground">
+                      See your ideas come to life in seconds with just a text description
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeInUp} className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full mt-1">
+                    <Layout className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Unlimited Creativity</h3>
+                    <p className="text-muted-foreground">
+                      Generate as many variations as you need until you find the perfect image
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeInUp} className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full mt-1">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Smart Suggestions</h3>
+                    <p className="text-muted-foreground">
+                      Get intelligent recommendations to enhance your images
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
+
+              <motion.div variants={fadeInUp} className="mt-8">
+                <SignedIn>
+                  <Link href="/chat">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-block"
+                    >
+                      <Button
+                        size="lg"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                      >
+                        Try It Now <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-block"
+                    >
+                      <Button
+                        size="lg"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                      >
+                        Sign In to Try <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </SignInButton>
+                </SignedOut>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ad Generation Section */}
+      <section
+        id="ads-section"
+        ref={adsRef}
+        className="w-full py-24 bg-gradient-to-b from-primary/5 to-background"
+      >
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <motion.div
+              className="lg:w-1/2"
+              initial="hidden"
+              animate={isAdsInView ? 'visible' : 'hidden'}
+              variants={staggerChildren}
+            >
+              <motion.span
+                variants={fadeInUp}
+                className="text-sm font-semibold text-primary uppercase tracking-wider"
+              >
+                Powerful Ad Creation
+              </motion.span>
+              <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold mt-2 mb-6">
+                Generate Stunning Ads From a Simple Sketch
+              </motion.h2>
+              <motion.p
+                variants={fadeInUp}
+                className="text-lg text-muted-foreground mb-6 leading-relaxed"
+              >
+                Turn your rough ideas or simple sketches into professional, attention-grabbing
+                advertisements. Perfect for social media, digital marketing, and promotional
+                materials.
+              </motion.p>
+
+              <motion.div variants={staggerChildren} className="space-y-5">
+                <motion.div variants={fadeInUp} className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full mt-1">
+                    <PenTool className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">From Sketch to Ad</h3>
+                    <p className="text-muted-foreground">
+                      Upload a simple sketch or describe your concept and watch it transform
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeInUp} className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full mt-1">
+                    <Layout className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Multi-format Support</h3>
+                    <p className="text-muted-foreground">
+                      Create ads for any platform - social media, web banners, print materials
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={fadeInUp} className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full mt-1">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Campaign Consistency</h3>
+                    <p className="text-muted-foreground">
+                      Generate multiple variations while maintaining your brand identity
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
+
+              <motion.div variants={fadeInUp} className="mt-8">
+                <SignedIn>
+                  <Link href="/chat">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-block"
+                    >
+                      <Button
+                        size="lg"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                      >
+                        Create Ads Now <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </Link>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-block"
+                    >
+                      <Button
+                        size="lg"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                      >
+                        Sign In to Create <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </SignInButton>
+                </SignedOut>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              className="lg:w-1/2"
+              initial="hidden"
+              animate={isAdsInView ? 'visible' : 'hidden'}
+              variants={staggerChildren}
+            >
+              <motion.div
+                variants={fadeInUp}
+                className="relative bg-card rounded-xl overflow-hidden shadow-xl p-2 border border-border/40"
+              >
+                <div className="rounded-lg aspect-video bg-card relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-background to-primary/5 flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <Layout className="h-10 w-10 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-semibold">Ad Generation Visualization</h3>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

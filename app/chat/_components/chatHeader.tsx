@@ -1,23 +1,23 @@
 'use client';
 
 import React from 'react';
-import { Settings, Share, Menu } from 'lucide-react';
+import { Menu, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 interface ChatHeaderProps {
   title: string;
   isMobile?: boolean;
   onMenuClick?: () => void;
+  onRename?: () => void;
 }
 
-export default function ChatHeader({ title, isMobile = false, onMenuClick }: ChatHeaderProps) {
+export default function ChatHeader({
+  title,
+  isMobile = false,
+  onMenuClick,
+  onRename,
+}: ChatHeaderProps) {
   return (
     <header className="flex items-center justify-between border-b border-border/40 px-3 sm:px-4 py-2 sm:py-3">
       <div className="flex items-center gap-2">
@@ -40,33 +40,20 @@ export default function ChatHeader({ title, isMobile = false, onMenuClick }: Cha
         >
           {title}
         </h2>
+        {onRename && (
+          <Button
+            onClick={onRename}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground"
+          >
+            <Pencil className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
+            <span className="sr-only">Edit chat title</span>
+          </Button>
+        )}
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn('text-muted-foreground', isMobile ? 'h-8 w-8' : 'h-9 w-9')}
-        >
-          <Share className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn('text-muted-foreground', isMobile ? 'h-8 w-8' : 'h-9 w-9')}
-            >
-              <Settings className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            <DropdownMenuItem>Edit chat title</DropdownMenuItem>
-            <DropdownMenuItem>Download chat</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Delete chat</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {/* right side empty or additional icons if needed */}
     </header>
   );
 }
