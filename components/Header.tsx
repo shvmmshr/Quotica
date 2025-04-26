@@ -4,7 +4,6 @@ import {
   SignedOut,
   SignInButton,
   SignUpButton,
-  useClerk,
   UserButton,
   useUser,
 } from '@clerk/nextjs';
@@ -12,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Pacifico } from 'next/font/google';
-import { Menu, MoveRight, X, Plus, History, Info, MessageSquare } from 'lucide-react';
+import { Menu, X, Plus, History, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useCredits } from '@/app/context/creditsContext';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
@@ -23,15 +22,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
 import { MembershipDialog } from '@/app/membership/components/membership-dialog';
 
 interface Transaction {
@@ -55,7 +45,6 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMembershipOpen, setIsMembershipOpen] = useState(false);
-  const { openSignIn } = useClerk();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isTransactionsLoading, setIsTransactionsLoading] = useState(false);
@@ -76,20 +65,6 @@ export default function Header() {
     }
   };
 
-  const openSignInDialog = (e: React.MouseEvent) => {
-    e.preventDefault();
-    openSignIn();
-  };
-
-  const scrollToPricing = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const pricingSection = document.getElementById('pricing');
-    if (pricingSection) {
-      pricingSection.scrollIntoView({ behavior: 'smooth' });
-    }
-    setMobileMenuOpen(false);
-  };
-
   return (
     <>
       <header className="w-full border-b border-border/40 backdrop-blur-xl bg-background/70 sticky top-0 z-50 shadow-sm">
@@ -108,87 +83,8 @@ export default function Header() {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:block">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="bg-transparent">
-                      Features
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                        <li className="row-span-3">
-                          <NavigationMenuLink asChild>
-                            <Link
-                              className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/20 to-primary/5 p-6 no-underline outline-none focus:shadow-md"
-                              href="/chat"
-                            >
-                              <MessageSquare className="h-6 w-6 text-primary" />
-                              <div className="mb-2 mt-4 text-lg font-medium text-foreground">
-                                AI Chat
-                              </div>
-                              <p className="text-sm leading-tight text-muted-foreground">
-                                Chat with our AI assistant to generate beautiful images from your
-                                thoughts.
-                              </p>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                        <SignedIn>
-                          <li>
-                            <Link href="/chat" legacyBehavior passHref>
-                              <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                                <div className="text-sm font-medium leading-none">Chat</div>
-                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                  Generate images through natural conversation
-                                </p>
-                              </NavigationMenuLink>
-                            </Link>
-                          </li>
-                        </SignedIn>
-                        <SignedOut>
-                          <li>
-                            <div onClick={openSignInDialog} className="cursor-pointer">
-                              <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                                <div className="text-sm font-medium leading-none">Chat</div>
-                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                  Generate images through natural conversation
-                                </p>
-                              </div>
-                            </div>
-                          </li>
-                        </SignedOut>
-                        <li>
-                          <div onClick={scrollToPricing} className="cursor-pointer">
-                            <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                              <div className="text-sm font-medium leading-none">Pricing</div>
-                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                Check out our pricing plans
-                              </p>
-                            </div>
-                          </div>
-                        </li>
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <Link href="/chat" legacyBehavior passHref>
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Chat
-                      </NavigationMenuLink>
-                    </Link>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <div onClick={scrollToPricing} className="cursor-pointer">
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Pricing
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
+            {/* Desktop Navigation - Removed Features, Chat and Pricing */}
+            <div className="hidden md:block">{/* Navigation items removed */}</div>
           </div>
 
           <nav className="flex items-center gap-3">
@@ -208,7 +104,7 @@ export default function Header() {
                   </div>
                   <Button
                     size="icon"
-                    className="rounded-l-none rounded-r-full h-9 bg-primary hover:bg-primary/90"
+                    className="rounded-l-none rounded-r-full h-9 bg-primary hover:bg-primary/90 cursor-pointer"
                     onClick={() => setIsMembershipOpen(true)}
                   >
                     <Plus size={16} />
@@ -221,7 +117,7 @@ export default function Header() {
                   onClick={fetchTransactions}
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 rounded-full border"
+                  className="h-9 w-9 rounded-full border cursor-pointer"
                   disabled={isTransactionsLoading}
                 >
                   {isTransactionsLoading ? (
@@ -238,7 +134,7 @@ export default function Header() {
             <SignedOut>
               <div className="hidden md:flex items-center gap-2">
                 <SignInButton>
-                  <Button variant="ghost" size="sm" className='cursor-pointer'>
+                  <Button variant="ghost" size="sm" className="cursor-pointer">
                     Sign In
                   </Button>
                 </SignInButton>
@@ -268,52 +164,7 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="container mx-auto px-4 py-4 md:hidden border-t">
             <div className="flex flex-col space-y-4">
-              <SignedIn>
-                <Link
-                  href="/chat"
-                  className="flex justify-between items-center py-2 hover:text-primary transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">Chat</span>
-                    <span className="text-xs text-muted-foreground">
-                      Generate images through natural conversation
-                    </span>
-                  </div>
-                  <MoveRight className="w-4 h-4" />
-                </Link>
-              </SignedIn>
-
-              <SignedOut>
-                <button
-                  onClick={(e) => {
-                    openSignInDialog(e);
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex justify-between items-center py-2 hover:text-primary transition-colors w-full text-left"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">Chat</span>
-                    <span className="text-xs text-muted-foreground">
-                      Generate images through natural conversation
-                    </span>
-                  </div>
-                  <MoveRight className="w-4 h-4" />
-                </button>
-              </SignedOut>
-
-              <button
-                onClick={scrollToPricing}
-                className="flex justify-between items-center py-2 hover:text-primary transition-colors w-full text-left"
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">Pricing</span>
-                  <span className="text-xs text-muted-foreground">
-                    View our pricing plans and choose what&apos;s right for you
-                  </span>
-                </div>
-                <MoveRight className="w-4 h-4" />
-              </button>
+              {/* Mobile navigation items removed */}
 
               <SignedIn>
                 <div className="flex items-center justify-between py-2">
@@ -330,7 +181,7 @@ export default function Header() {
                       onClick={fetchTransactions}
                       variant="outline"
                       size="icon"
-                      className="h-9 w-9 rounded-full border"
+                      className="h-9 w-9 rounded-full border cursor-pointer"
                       disabled={isTransactionsLoading}
                     >
                       {isTransactionsLoading ? (
@@ -342,7 +193,7 @@ export default function Header() {
                     </Button>
                     <Button
                       size="icon"
-                      className="h-8 w-8 rounded-full"
+                      className="h-8 w-8 rounded-full cursor-pointer"
                       onClick={() => setIsMembershipOpen(true)}
                     >
                       <Plus size={14} />
@@ -370,13 +221,13 @@ export default function Header() {
 
       {/* Transaction History Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-md max-h-[80vh]">
+        <DialogContent className="max-w-md overflow-hidden">
           <DialogHeader>
             <DialogTitle>Transaction History</DialogTitle>
             <DialogDescription>Your transaction history and credits usage.</DialogDescription>
           </DialogHeader>
 
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="overflow-y-auto pr-1" style={{ maxHeight: 'calc(80vh - 180px)' }}>
             {isTransactionsLoading ? (
               <div className="p-8 flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />

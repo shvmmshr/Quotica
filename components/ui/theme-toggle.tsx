@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import * as React from 'react';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -42,10 +42,10 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className={`p-2 rounded-full ${
+      className={`cursor-pointer p-2 rounded-full ${
         effectiveTheme === 'dark'
-          ? "bg-gray-800 hover:bg-gray-700"
-          : "bg-white hover:bg-gray-100 border"
+          ? 'bg-gray-800 hover:bg-gray-700'
+          : 'bg-white hover:bg-gray-100 border'
       }`}
       aria-label="Toggle theme"
       suppressHydrationWarning
