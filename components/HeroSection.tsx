@@ -38,9 +38,9 @@ const HeroSection: React.FC = () => {
     offset: ['start start', 'end start'],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.3], [1, 0.9]);
-  const y = useTransform(scrollYProgress, [0, 0.3], [0, 70]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.9]);
+  const y = useTransform(scrollYProgress, [0, 0.8], [0, 70]);
 
   // Initialize Lenis for smooth scrolling with optimized settings
   useEffect(() => {
@@ -221,7 +221,7 @@ const HeroSection: React.FC = () => {
                         transition: { duration: 0.5 },
                       },
                     }}
-                    className="text-center text-5xl sm:text-6xl md:text-7xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#480277] to-[#9900ff] dark:from-primary dark:via-blue-200 dark:to-blue-400 leading-tight"
+                    className="text-center text-4xl sm:text-6xl md:text-7xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#480277] to-[#9900ff] dark:from-primary dark:via-blue-200 dark:to-blue-400 leading-tight"
                   >
                     Transform Your Thoughts
                   </motion.h1>
@@ -250,7 +250,7 @@ const HeroSection: React.FC = () => {
                         transition: { duration: 0.5 },
                       },
                     }}
-                    className="text-center text-5xl sm:text-6xl md:text-7xl font-bold"
+                    className="text-center text-4xl sm:text-6xl md:text-7xl font-bold"
                   >
                     Into Beautiful Images
                   </motion.h1>
@@ -293,7 +293,7 @@ const HeroSection: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
-                className="text-lg md:text-xl text-center max-w-3xl mx-auto leading-relaxed text-muted-foreground"
+                className="text-base sm:text-lg md:text-xl text-center max-w-3xl mx-auto leading-relaxed text-muted-foreground"
               >
                 Generate stunning, eye-catching images and ads from your thoughts with just a few
                 clicks. Perfect for marketing, social media, presentations, or any creative project.
@@ -345,9 +345,9 @@ const HeroSection: React.FC = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 0.6 }}
-            className="mt-16 mb-24 container max-w-6xl mx-auto px-4 flex justify-center items-center"
+            className="mt-12 sm:mt-16 mb-16 sm:mb-24 container max-w-6xl mx-auto px-4 flex justify-center items-center"
           >
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-10">
               {images.map((img, index) => (
                 <motion.div
                   key={index}
@@ -359,7 +359,7 @@ const HeroSection: React.FC = () => {
                   transition={{ delay: index * 0.5 }}
                   whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
                 >
-                  <div className="bg-card w-[300px] h-[200px] md:w-[320px] md:h-[220px] rounded-lg overflow-hidden relative">
+                  <div className="bg-card w-[280px] h-[187px] sm:w-[300px] sm:h-[200px] md:w-[320px] md:h-[220px] rounded-lg overflow-hidden relative">
                     <Image
                       src={img.src}
                       alt={img.text}
@@ -382,12 +382,12 @@ const HeroSection: React.FC = () => {
       <section
         id="thoughts-section"
         ref={thoughtsRef}
-        className="w-full py-24 bg-gradient-to-b from-background to-primary/5"
+        className="w-full py-16 sm:py-24 bg-gradient-to-b from-background to-primary/5"
       >
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <motion.div
-              className="lg:w-1/2 order-2 lg:order-1"
+              className="w-full lg:w-1/2"
               initial="hidden"
               animate={isThoughtsInView ? 'visible' : 'hidden'}
               variants={staggerChildren}
@@ -397,29 +397,26 @@ const HeroSection: React.FC = () => {
                 className="relative bg-card rounded-xl overflow-hidden shadow-xl p-2 border border-border/40"
               >
                 <div className="rounded-lg aspect-video bg-card relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                        <Image
-                          src={'/images/ghibli1.webp'}
-                          alt={'Ad Icon'}
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-lg"
-                        />
-                        <div className="absolute bottom-0 w-full bg-black/50 text-white text-sm text-center py-2">
-                          {'Create an image of a family in Ghibli style'}
-                        </div>
-                      </div>
-                      {/* <h3 className="text-xl font-semibold">Thoughts to Images Visualization</h3> */}
-                    </div>
+                  <Image
+                    src={'/images/ghibli1.webp'}
+                    alt={'A family in Ghibli style'}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <p className="font-semibold">
+                      &quot;Create an image of a family in Ghibli style&quot;
+                    </p>
+                    <p className="text-sm text-white/80">AI Generated Image</p>
                   </div>
                 </div>
               </motion.div>
             </motion.div>
 
             <motion.div
-              className="lg:w-1/2 order-1 lg:order-2"
+              className="w-full lg:w-1/2"
               initial="hidden"
               animate={isThoughtsInView ? 'visible' : 'hidden'}
               variants={staggerChildren}
@@ -435,7 +432,7 @@ const HeroSection: React.FC = () => {
               </motion.h2>
               <motion.p
                 variants={fadeInUp}
-                className="text-lg text-muted-foreground mb-6 leading-relaxed"
+                className="text-base sm:text-lg text-muted-foreground mb-6 leading-relaxed"
               >
                 Just describe what you want in natural language, and our AI will transform your
                 thoughts into beautiful, professional-quality images. No design skills needed.
@@ -522,12 +519,12 @@ const HeroSection: React.FC = () => {
       <section
         id="ads-section"
         ref={adsRef}
-        className="w-full py-24 bg-gradient-to-b from-primary/5 to-background"
+        className="w-full py-16 sm:py-24 bg-gradient-to-b from-primary/5 to-background"
       >
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <motion.div
-              className="lg:w-1/2"
+              className="w-full lg:w-1/2 order-2 lg:order-1"
               initial="hidden"
               animate={isAdsInView ? 'visible' : 'hidden'}
               variants={staggerChildren}
@@ -543,7 +540,7 @@ const HeroSection: React.FC = () => {
               </motion.h2>
               <motion.p
                 variants={fadeInUp}
-                className="text-lg text-muted-foreground mb-6 leading-relaxed"
+                className="text-base sm:text-lg text-muted-foreground mb-6 leading-relaxed"
               >
                 Turn your rough ideas or simple sketches into professional, attention-grabbing
                 advertisements. Perfect for social media, digital marketing, and promotional
@@ -625,7 +622,7 @@ const HeroSection: React.FC = () => {
             </motion.div>
 
             <motion.div
-              className="lg:w-1/2"
+              className="w-full lg:w-1/2 order-1 lg:order-2"
               initial="hidden"
               animate={isAdsInView ? 'visible' : 'hidden'}
               variants={staggerChildren}
@@ -635,22 +632,17 @@ const HeroSection: React.FC = () => {
                 className="relative bg-card rounded-xl overflow-hidden shadow-xl p-2 border border-border/40"
               >
                 <div className="rounded-lg aspect-video bg-card relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-background to-primary/5 flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                        <Image
-                          src={'/images/shoe1.webp'}
-                          alt={'Ad Icon'}
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-lg"
-                        />
-                        <div className="absolute bottom-0 w-full bg-black/50 text-white text-sm text-center py-2">
-                          {'Create a Stunning Ad of a Nike Shoe'}
-                        </div>
-                      </div>
-                      {/* <h3 className="text-xl font-semibold">Ad Generation Visualization</h3> */}
-                    </div>
+                  <Image
+                    src={'/images/shoe1.webp'}
+                    alt={'Ad for a Nike Shoe'}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <p className="font-semibold">&quot;Create a Stunning Ad of a Nike Shoe&quot;</p>
+                    <p className="text-sm text-white/80">AI Generated Ad</p>
                   </div>
                 </div>
               </motion.div>
