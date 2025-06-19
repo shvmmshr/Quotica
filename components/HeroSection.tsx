@@ -5,15 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence, useInView } from 'fra
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from './ui/button';
-import {
-  ArrowRight,
-  Sparkles,
-  MousePointerClick,
-  ChevronDown,
-  PenTool,
-  Layout,
-  Lightbulb,
-} from 'lucide-react';
+import { Sparkles, MousePointerClick, ChevronDown, PenTool, Layout, Lightbulb } from 'lucide-react';
 import Lenis from 'lenis';
 import { Hero } from './blocks/hero';
 import Image from 'next/image';
@@ -641,7 +633,7 @@ const HeroSection: React.FC = () => {
                         size="lg"
                         className="rounded-full px-8 bg-primary hover:bg-primary/90"
                       >
-                        Create Ads Now <ArrowRight className="ml-2 h-4 w-4" />
+                        Create Ads Now <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </motion.div>
                   </Link>
