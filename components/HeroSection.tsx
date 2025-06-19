@@ -7,7 +7,6 @@ import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from './ui/button';
 import {
   ArrowRight,
-  Image as ImageIcon,
   Sparkles,
   MousePointerClick,
   ChevronDown,
@@ -17,7 +16,8 @@ import {
 } from 'lucide-react';
 import Lenis from 'lenis';
 import { Hero } from './blocks/hero';
-// import Image from 'next/image';
+import Image from 'next/image';
+import { ArrowTopRightIcon } from '@radix-ui/react-icons';
 
 const HeroSection: React.FC = () => {
   const targetRef = useRef<HTMLDivElement>(null);
@@ -26,6 +26,12 @@ const HeroSection: React.FC = () => {
   const isThoughtsInView = useInView(thoughtsRef, { once: false, amount: 0.3 });
   const isAdsInView = useInView(adsRef, { once: false, amount: 0.3 });
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+
+  const images = [
+    { src: '/images/cat.jpeg', text: 'Cat on a tree' },
+    { src: '/images/friends.jpeg', text: 'Real photo converted to Ghibli' },
+    { src: '/images/shoe2.png', text: 'Nike Advertisement' },
+  ];
 
   const { scrollYProgress } = useScroll({
     target: targetRef,
@@ -105,20 +111,20 @@ const HeroSection: React.FC = () => {
   //   },
   // };
 
-  const pulseAnimation = {
-    initial: { scale: 1 },
-    animate: {
-      scale: [1, 1.03, 1],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
+  // const pulseAnimation = {
+  //   initial: { scale: 1 },
+  //   animate: {
+  //     scale: [1, 1.03, 1],
+  //     transition: {
+  //       duration: 3,
+  //       repeat: Infinity,
+  //       ease: 'easeInOut',
+  //     },
+  //   },
+  // };
 
   // Example images
-  const exampleImages = ['/example-1.jpg', '/example-2.jpg', '/example-3.jpg'];
+  // const exampleImages = ['/example-1.jpg', '/example-2.jpg', '/example-3.jpg'];
 
   return (
     <div className="flex flex-col items-center w-full overflow-hidden">
@@ -307,7 +313,7 @@ const HeroSection: React.FC = () => {
                       size="lg"
                       className="gap-2 px-6 rounded-full bg-primary hover:bg-primary/90"
                     >
-                      Chat Now <ArrowRight className="h-4 w-4" />
+                      Chat Now <ArrowTopRightIcon className="h-4 w-4" />
                     </Button>
                   </motion.div>
                 ),
@@ -342,24 +348,27 @@ const HeroSection: React.FC = () => {
             className="mt-16 mb-24 container max-w-6xl mx-auto px-4 flex justify-center items-center"
           >
             <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-              {exampleImages.map((src, index) => (
+              {images.map((img, index) => (
                 <motion.div
                   key={index}
                   className={`relative rounded-lg overflow-hidden shadow-lg ${
                     index === 1 ? 'md:mt-10' : ''
                   }`}
-                  variants={pulseAnimation}
-                  initial="initial"
-                  animate="animate"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.5 }}
                   whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
                 >
-                  <div className="bg-card w-[300px] h-[200px] md:w-[320px] md:h-[220px] flex items-center justify-center rounded-lg">
-                    <div className="p-4 text-center">
-                      <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                        <ImageIcon className="h-8 w-8 text-primary/60" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">Example image {index + 1}</p>
+                  <div className="bg-card w-[300px] h-[200px] md:w-[320px] md:h-[220px] rounded-lg overflow-hidden relative">
+                    <Image
+                      src={img.src}
+                      alt={img.text}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-lg"
+                    />
+                    <div className="absolute bottom-0 w-full bg-black/50 text-white text-sm text-center py-2">
+                      {img.text}
                     </div>
                   </div>
                 </motion.div>
@@ -391,9 +400,18 @@ const HeroSection: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background flex items-center justify-center">
                     <div className="text-center p-8">
                       <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                        <PenTool className="h-10 w-10 text-primary" />
+                        <Image
+                          src={'/images/ghibli1.webp'}
+                          alt={'Ad Icon'}
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
+                        />
+                        <div className="absolute bottom-0 w-full bg-black/50 text-white text-sm text-center py-2">
+                          {'Create an image of a family in Ghibli style'}
+                        </div>
                       </div>
-                      <h3 className="text-xl font-semibold">Thoughts to Images Visualization</h3>
+                      {/* <h3 className="text-xl font-semibold">Thoughts to Images Visualization</h3> */}
                     </div>
                   </div>
                 </div>
@@ -473,7 +491,7 @@ const HeroSection: React.FC = () => {
                         size="lg"
                         className="rounded-full px-8 bg-primary hover:bg-primary/90"
                       >
-                        Try It Now <ArrowRight className="ml-2 h-4 w-4" />
+                        Try It Now <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </motion.div>
                   </Link>
@@ -489,7 +507,7 @@ const HeroSection: React.FC = () => {
                         size="lg"
                         className="rounded-full px-8 bg-primary hover:bg-primary/90"
                       >
-                        Sign In to Try <ArrowRight className="ml-2 h-4 w-4" />
+                        Sign In to Try <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </motion.div>
                   </SignInButton>
@@ -598,7 +616,7 @@ const HeroSection: React.FC = () => {
                         size="lg"
                         className="rounded-full px-8 bg-primary hover:bg-primary/90"
                       >
-                        Sign In to Create <ArrowRight className="ml-2 h-4 w-4" />
+                        Sign In to Create <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </motion.div>
                   </SignInButton>
@@ -620,9 +638,18 @@ const HeroSection: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-background to-primary/5 flex items-center justify-center">
                     <div className="text-center p-8">
                       <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                        <Layout className="h-10 w-10 text-primary" />
+                        <Image
+                          src={'/images/shoe1.webp'}
+                          alt={'Ad Icon'}
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
+                        />
+                        <div className="absolute bottom-0 w-full bg-black/50 text-white text-sm text-center py-2">
+                          {'Create a Stunning Ad of a Nike Shoe'}
+                        </div>
                       </div>
-                      <h3 className="text-xl font-semibold">Ad Generation Visualization</h3>
+                      {/* <h3 className="text-xl font-semibold">Ad Generation Visualization</h3> */}
                     </div>
                   </div>
                 </div>
