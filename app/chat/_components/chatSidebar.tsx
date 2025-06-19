@@ -113,7 +113,7 @@ export default function ChatSidebar({
       className={cn(
         'bg-background/80 backdrop-blur-sm border-r border-border/30 h-full',
         isMobile
-          ? 'fixed inset-y-0 left-0 z-50 w-[280px] transition-transform transform duration-300 ease-in-out shadow-xl'
+          ? 'fixed top-[66px] bottom-0 left-0 z-40 w-[280px] transition-transform transform duration-300 ease-in-out shadow-xl'
           : 'w-[280px]',
         isMobile && !isOpen && '-translate-x-full',
         isMobile && isOpen && 'translate-x-0'

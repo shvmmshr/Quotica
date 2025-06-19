@@ -170,7 +170,7 @@ export default function ChatLayout() {
   }
 
   return (
-    <div className="h-[calc(100vh-66px)] overflow-hidden bg-background/30 relative">
+    <div className="h-[calc(100vh-66px)] overflow-hidden bg-background/30 relative mt-0">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl opacity-70"></div>
@@ -183,7 +183,7 @@ export default function ChatLayout() {
           variant="outline"
           size="icon"
           onClick={toggleSidebar}
-          className="absolute top-3 left-3 z-50 h-9 w-9 rounded-full md:hidden shadow-md bg-background"
+          className="absolute top-2 left-2 z-40 h-9 w-9 rounded-full md:hidden shadow-md bg-background border-border"
         >
           <Menu size={18} />
           <span className="sr-only">Toggle menu</span>
@@ -208,7 +208,7 @@ export default function ChatLayout() {
         {/* Overlay for mobile when sidebar is open */}
         {isMobile && sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/40 z-40 md:hidden"
+            className="fixed top-[66px] left-0 right-0 bottom-0 bg-black/40 z-30 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}

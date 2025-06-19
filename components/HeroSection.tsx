@@ -26,6 +26,22 @@ const HeroSection: React.FC = () => {
   const isThoughtsInView = useInView(thoughtsRef, { once: false, amount: 0.3 });
   const isAdsInView = useInView(adsRef, { once: false, amount: 0.3 });
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        ) || window.innerWidth <= 768;
+      setIsMobile(mobile);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const images = [
     { src: '/images/cat.jpeg', text: 'Cat on a tree' },
@@ -44,13 +60,26 @@ const HeroSection: React.FC = () => {
 
   // Initialize Lenis for smooth scrolling with optimized settings
   useEffect(() => {
+    // Only initialize Lenis if not on mobile for better native scrolling
+    if (isMobile) {
+      // On mobile, disable custom scrolling and rely on native scrolling
+      document.body.style.scrollBehavior = 'auto';
+      const timer = setTimeout(() => {
+        setShowScrollIndicator(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+
     const lenis = new Lenis({
-      duration: 1, // Reduced for better performance
+      duration: 1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.8, // Lower for smoother performance
+      wheelMultiplier: 0.8,
       syncTouch: true,
+      touchMultiplier: 1.0,
+      infinite: false,
+      gestureOrientation: 'vertical',
     });
 
     function raf(time: number) {
@@ -70,7 +99,7 @@ const HeroSection: React.FC = () => {
       lenis.destroy();
       clearTimeout(timer);
     };
-  }, []);
+  }, [isMobile]); // Add isMobile as dependency
 
   const handleScrollDown = () => {
     const thoughtsSection = document.getElementById('thoughts-section');
@@ -151,44 +180,59 @@ const HeroSection: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Parallax effect on hero section */}
-        <motion.div style={{ opacity, scale, y }} className="w-full will-change-transform">
-          {/* Hero Background with animated gradient */}
+        {/* Parallax effect on hero section - reduced on mobile */}
+        <motion.div
+          style={!isMobile ? { opacity, scale, y } : {}}
+          className="w-full will-change-transform"
+        >
+          {/* Hero Background with animated gradient - disabled on mobile for better performance */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-10 left-0 w-full h-full">
               <motion.div
                 className="w-1/2 h-1/2 bg-primary/10 rounded-full filter blur-3xl will-change-transform"
-                animate={{
-                  x: [0, 50, -30, 0],
-                  y: [0, -30, 50, 0],
-                }}
+                animate={
+                  !isMobile
+                    ? {
+                        x: [0, 50, -30, 0],
+                        y: [0, -30, 50, 0],
+                      }
+                    : {}
+                }
                 transition={{
                   duration: 30, // Slower animation for less CPU usage
-                  repeat: Infinity,
+                  repeat: isMobile ? 0 : Infinity,
                   ease: 'linear',
                 }}
               />
               <motion.div
                 className="absolute top-1/3 right-1/4 w-1/3 h-1/3 bg-purple-500/10 rounded-full filter blur-3xl will-change-transform"
-                animate={{
-                  x: [0, -40, 60, 0],
-                  y: [0, 60, -40, 0],
-                }}
+                animate={
+                  !isMobile
+                    ? {
+                        x: [0, -40, 60, 0],
+                        y: [0, 60, -40, 0],
+                      }
+                    : {}
+                }
                 transition={{
                   duration: 28,
-                  repeat: Infinity,
+                  repeat: isMobile ? 0 : Infinity,
                   ease: 'linear',
                 }}
               />
               <motion.div
                 className="absolute bottom-1/4 left-1/3 w-1/4 h-1/4 bg-blue-500/10 rounded-full filter blur-3xl will-change-transform"
-                animate={{
-                  x: [0, 70, -50, 0],
-                  y: [0, -50, 70, 0],
-                }}
+                animate={
+                  !isMobile
+                    ? {
+                        x: [0, 70, -50, 0],
+                        y: [0, -50, 70, 0],
+                      }
+                    : {}
+                }
                 transition={{
                   duration: 32,
-                  repeat: Infinity,
+                  repeat: isMobile ? 0 : Infinity,
                   ease: 'linear',
                 }}
               />
