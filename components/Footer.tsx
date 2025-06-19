@@ -3,9 +3,9 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+// import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Github, MonitorIcon, Moon, Send, Sun, Twitter } from 'lucide-react';
+import { Github, MonitorIcon, Moon, Sun, Twitter } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Pacifico } from 'next/font/google';
 
@@ -49,7 +49,7 @@ export default function Footer() {
               Generate beautiful AI images from your quotes. Perfect for social media,
               presentations, and more.
             </p>
-            <form className="relative">
+            {/* <form className="relative">
               <Input
                 type="email"
                 placeholder="Enter your email"
@@ -63,7 +63,7 @@ export default function Footer() {
                 <Send className="h-4 w-4" />
                 <span className="sr-only">Subscribe</span>
               </Button>
-            </form>
+            </form> */}
             <div className="absolute -right-4 top-0 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
           </div>
           <div>
@@ -204,11 +204,11 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-center md:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-center gap-4 border-t pt-8 text-center md:flex-row">
           <p className="text-sm text-muted-foreground">
             © {currentYear} Quotica. All rights reserved.
           </p>
-          <nav className="flex gap-4 text-sm">
+          {/* <nav className="flex gap-4 text-sm">
             <Link href="/privacy" className="transition-colors hover:text-primary">
               Privacy Policy
             </Link>
@@ -218,7 +218,7 @@ export default function Footer() {
             <Link href="/contact" className="transition-colors hover:text-primary">
               Contact Us
             </Link>
-          </nav>
+          </nav> */}
         </div>
       </div>
     </footer>
