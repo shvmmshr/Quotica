@@ -154,9 +154,9 @@ export default function MessageInput({
             >
               <XIcon size={14} />
             </button>
-            {message && (
+            {/* {message && (
               <p className="text-xs mt-2 line-clamp-2 text-muted-foreground">{message}</p>
-            )}
+            )} */}
           </div>
         )}
 

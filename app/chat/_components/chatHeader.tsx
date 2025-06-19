@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Menu, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -25,10 +25,10 @@ export default function ChatHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground mr-1"
+            className="h-8 w-8 text-muted-foreground mr-1 mb-2"
             onClick={onMenuClick}
           >
-            <Menu className="h-5 w-5" />
+            {/* <Menu className="h-18 w-18" /> */}
             <span className="sr-only">Menu</span>
           </Button>
         )}
