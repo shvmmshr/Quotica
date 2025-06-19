@@ -153,8 +153,11 @@ export default function ContactUs() {
                 <div>
                   <h3 className="font-medium">Support Hours</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Monday - Friday: 9AM - 5PM EST
+                    <a href="tel:+919153238346" className="text-primary hover:underline">
+                      +91 91532 38346
+                    </a>
                   </p>
+                  <p className="text-sm text-muted-foreground">Monday - Friday: 9AM - 5PM EST</p>
                   <p className="text-sm text-muted-foreground">
                     Weekend support available for premium users
                   </p>
