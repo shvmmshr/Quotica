@@ -60,24 +60,45 @@ export default function MessageInput({
     if (imageFile) {
       setIsProcessing(true);
       try {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const base64String = event.target?.result as string;
-          clearImage();
-          // Unified image handling for all model types (now including gptImage)
-          await onSendImage(base64String, message, selectedOption, imageFile.type);
-          toast.success('Image processed');
-          setMessage('');
-          setIsProcessing(false);
-        };
-        reader.onerror = () => {
-          toast.error('Failed to read image file');
-          setIsProcessing(false);
-        };
-        reader.readAsDataURL(imageFile);
+        // Enhanced mobile-friendly image processing
+        const base64String = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+
+          reader.onload = (event) => {
+            const result = event.target?.result as string;
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error('Failed to read image file'));
+            }
+          };
+
+          reader.onerror = () => {
+            reject(new Error('FileReader error occurred'));
+          };
+
+          reader.onabort = () => {
+            reject(new Error('FileReader operation was aborted'));
+          };
+
+          // Use readAsDataURL for better mobile compatibility
+          reader.readAsDataURL(imageFile);
+        });
+
+        clearImage();
+
+        // Add validation for base64 string
+        if (!base64String || !base64String.includes('base64,')) {
+          throw new Error('Invalid image data generated');
+        }
+
+        await onSendImage(base64String, message, selectedOption, imageFile.type);
+        toast.success('Image processed');
+        setMessage('');
+        setIsProcessing(false);
       } catch (error) {
-        toast.error('Failed to process image');
-        console.error(error);
+        console.error('Image processing error:', error);
+        toast.error('Failed to process image. Please try again.');
         setIsProcessing(false);
       }
     } else {
@@ -94,23 +115,45 @@ export default function MessageInput({
     if (!e.target.files || e.target.files.length === 0) return;
 
     const file = e.target.files[0];
+
+    // Enhanced validation for mobile devices
+    if (!file) {
+      toast.error('No file selected');
+      return;
+    }
+
     if (!file.type.match('image.*')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      // 5MB limit
-      toast.error('Image size should be less than 5MB');
+    // Increased size limit for mobile photos (they tend to be larger)
+    if (file.size > 10 * 1024 * 1024) {
+      // 10MB limit instead of 5MB
+      toast.error('Image size should be less than 10MB');
+      return;
+    }
+
+    // Additional check for common mobile image formats
+    const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic'];
+    if (!supportedTypes.includes(file.type.toLowerCase())) {
+      toast.error('Unsupported image format. Please use JPEG, PNG, or WebP.');
       return;
     }
 
     setImageFile(file);
 
-    // Create preview
+    // Create preview with error handling
     const reader = new FileReader();
     reader.onload = (event) => {
-      setImagePreview(event.target?.result as string);
+      const result = event.target?.result as string;
+      if (result) {
+        setImagePreview(result);
+      }
+    };
+    reader.onerror = () => {
+      console.error('Error creating image preview');
+      toast.error('Error creating image preview');
     };
     reader.readAsDataURL(file);
   };
