@@ -127,4 +127,38 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Optimize scroll performance on mobile */
+  @media (max-width: 768px) {
+    html {
+      scroll-behavior: auto; /* Disable smooth scroll on mobile for better performance */
+      -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+    }
+
+    body {
+      overscroll-behavior: contain; /* Prevent bounce scrolling */
+      touch-action: manipulation; /* Optimize touch interactions */
+    }
+
+    /* Disable expensive animations on mobile */
+    * {
+      will-change: auto !important;
+    }
+
+    /* Reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  }
+
+  /* Enable GPU acceleration for better performance */
+  @media (min-width: 769px) {
+    .will-change-transform {
+      will-change: transform;
+    }
+  }
 }

@@ -19,7 +19,9 @@ export default function ChatHeader({
   onRename,
 }: ChatHeaderProps) {
   return (
-    <header className="flex items-center justify-between border-b border-border/40 px-3 sm:px-4 py-2 sm:py-3">
+    <header
+      className={`flex items-center justify-between border-b border-border/40 px-3 sm:px-4 py-2 sm:py-3 ${isMobile ? 'pl-12' : ''}`}
+    >
       <div className="flex items-center gap-2">
         {isMobile && onMenuClick && (
           <Button
