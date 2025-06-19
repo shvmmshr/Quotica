@@ -18,16 +18,40 @@ export async function POST(req: Request) {
       );
     }
 
+    // Enhanced validation for base64 images from mobile devices
+    const processedImageUrl = imageUrl;
+
+    // Handle base64 data URLs properly
+    if (imageUrl.startsWith('data:image/')) {
+      const base64Data = imageUrl.split(',')[1];
+      if (!base64Data) {
+        return NextResponse.json({ message: 'Invalid base64 image data' }, { status: 400 });
+      }
+      // Validate base64 format
+      try {
+        Buffer.from(base64Data, 'base64');
+      } catch (error) {
+        console.error('❌ Invalid base64 encoding:', error);
+        return NextResponse.json({ message: 'Invalid base64 encoding' }, { status: 400 });
+      }
+    }
+
     const folder = `${process.env.NEXT_PUBLIC_IMAGEKIT_FOLDER}/${sessionId}`;
     const result = await imagekit.upload({
-      file: imageUrl,
-      fileName: fileName, // Unique file name
-      useUniqueFileName: true, // Avoid overwriting
-      folder: folder, // Store inside sessionId folder
+      file: processedImageUrl,
+      fileName: fileName,
+      useUniqueFileName: true,
+      folder: folder,
+      // Add transformation for mobile optimization
+      transformation: {
+        pre: 'q_auto,f_auto', // Auto quality and format optimization
+      },
     });
+
     if (!result || !result.url) {
       return NextResponse.json({ message: 'Failed to upload image' }, { status: 500 });
     }
+
     // Append cache-busting timestamp
     const timestamp = Date.now();
     const cacheBustedUrl = `${result.url}?v=${timestamp}`;
@@ -43,7 +67,13 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('❌ Error uploading image to ImageKit:', error);
-    return new Response(JSON.stringify({ message: 'Failed to upload image' }), { status: 500 });
+    return new Response(
+      JSON.stringify({
+        message: 'Failed to upload image',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }),
+      { status: 500 }
+    );
   }
 }
 
