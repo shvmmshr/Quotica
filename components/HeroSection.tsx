@@ -44,7 +44,7 @@ const HeroSection: React.FC = () => {
   }, []);
 
   const images = [
-    { src: '/images/cat.jpeg', text: 'Cat on a tree' },
+    { src: '/images/cat.jpeg', text: 'Ghibli style cat image' },
     { src: '/images/friends.jpeg', text: 'Real photo converted to Ghibli' },
     { src: '/images/shoe2.png', text: 'Nike Advertisement' },
   ];
