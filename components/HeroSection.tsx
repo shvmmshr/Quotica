@@ -5,15 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence, useInView } from 'fra
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { Button } from './ui/button';
-import {
-  ArrowRight,
-  Sparkles,
-  MousePointerClick,
-  ChevronDown,
-  PenTool,
-  Layout,
-  Lightbulb,
-} from 'lucide-react';
+import { Sparkles, MousePointerClick, ChevronDown, PenTool, Layout, Lightbulb } from 'lucide-react';
 import Lenis from 'lenis';
 import { Hero } from './blocks/hero';
 import Image from 'next/image';
@@ -60,13 +52,13 @@ const HeroSection: React.FC = () => {
 
   // Initialize Lenis for smooth scrolling with optimized settings
   useEffect(() => {
-    // Only initialize Lenis if not on mobile for better native scrolling
     if (isMobile) {
-      // On mobile, disable custom scrolling and rely on native scrolling
       document.body.style.scrollBehavior = 'auto';
+
       const timer = setTimeout(() => {
         setShowScrollIndicator(false);
       }, 5000);
+
       return () => clearTimeout(timer);
     }
 
@@ -86,26 +78,34 @@ const HeroSection: React.FC = () => {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
-
     requestAnimationFrame(raf);
 
-    // Hide scroll indicator after 5 seconds
-    const timer = setTimeout(() => {
-      setShowScrollIndicator(false);
-    }, 5000);
+    const checkScroll = () => {
+      const scrollY = lenis.scroll;
+      const maxScroll = lenis.limit; // Total scrollable height
+      const buffer = 10; // px from bottom before hiding
+
+      if (scrollY >= maxScroll - buffer) {
+        setShowScrollIndicator(false);
+      } else {
+        setShowScrollIndicator(true);
+      }
+    };
+
+    // Listen to Lenis scroll events
+    lenis.on('scroll', checkScroll);
+    checkScroll(); // Initial check
 
     return () => {
-      // Clean up
       lenis.destroy();
-      clearTimeout(timer);
     };
-  }, [isMobile]); // Add isMobile as dependency
+  }, [isMobile]);
 
   const handleScrollDown = () => {
-    const thoughtsSection = document.getElementById('thoughts-section');
-    if (thoughtsSection) {
-      thoughtsSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    window.scrollBy({
+      top: window.innerHeight,
+      behavior: 'smooth',
+    });
   };
 
   // Animation variants
@@ -641,7 +641,7 @@ const HeroSection: React.FC = () => {
                         size="lg"
                         className="rounded-full px-8 bg-primary hover:bg-primary/90"
                       >
-                        Create Ads Now <ArrowRight className="ml-2 h-4 w-4" />
+                        Create Ads Now <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </motion.div>
                   </Link>
