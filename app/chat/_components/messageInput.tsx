@@ -217,7 +217,7 @@ export default function MessageInput({
           setImagePreview(result);
 
           if (isMobile) {
-            toast.success('Image loaded successfully');
+            // toast.success('Image loaded successfully');
           }
         } catch (validationError) {
           console.error('Image validation error:', validationError);
