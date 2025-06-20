@@ -73,7 +73,6 @@ export default function MessageInput({
         if (!base64String || !base64String.includes('base64,')) {
           throw new Error('Invalid image data - please try uploading the image again');
         }
-
         // Verify the base64 data is not corrupted
         const base64Data = base64String.split(',')[1];
         if (!base64Data || base64Data.length < 100) {
@@ -175,9 +174,9 @@ export default function MessageInput({
     }
 
     setImageFile(file);
-
     // Read and store the Base64 string immediately when file is selected
     // This prevents mobile FileReader issues later in sendMessage
+
     const reader = new FileReader();
 
     // Add timeout for mobile devices
