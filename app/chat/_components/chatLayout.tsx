@@ -177,8 +177,8 @@ export default function ChatLayout() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Mobile menu button */}
-      {isMobile && (
+      {/* Mobile menu button - only show when no current chat */}
+      {isMobile && !currentChat && (
         <Button
           variant="outline"
           size="icon"
