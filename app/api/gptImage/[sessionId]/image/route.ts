@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { v4 as uuid } from 'uuid';
 import OpenAI from 'openai';
+import { getChatContext, getRelevantChatContext } from '@/lib/utils/chat-context';
+import { chatConfig } from '@/lib/config/chat';
 
 export async function POST(
   req: NextRequest,
@@ -20,10 +22,30 @@ export async function POST(
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    // Get chat context from previous messages
+    const contextMessages = chatConfig.context.useRelevantContext
+      ? await getRelevantChatContext(sessionId, content, chatConfig.context.maxWords)
+      : await getChatContext(sessionId, chatConfig.context.maxWords);
+
+    // Create enhanced prompt with context for better image generation
+    let enhancedPrompt = content;
+    if (contextMessages.length > 0) {
+      // Get the last few messages for immediate context
+      const recentContext = contextMessages
+        .slice(-5)
+        .map((msg) => {
+          const role = msg.role === 'assistant' ? 'Previous generation' : 'Previous request';
+          return `${role}: ${msg.content}`;
+        })
+        .join('\n');
+
+      enhancedPrompt = `${chatConfig.context.systemPrompts.gptImage}\n\nContext from recent conversation:\n${recentContext}\n\nCurrent request: ${content}`;
+    }
+
     // Generate image with DALL-E
     const response = await openai.images.generate({
       model: 'gpt-image-1',
-      prompt: content,
+      prompt: enhancedPrompt,
       n: 1,
       size: size as '1024x1024' | '1024x1536' | '1536x1024',
     });

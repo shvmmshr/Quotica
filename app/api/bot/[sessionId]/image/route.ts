@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import OpenAI from 'openai';
+import {
+  getChatContext,
+  getRelevantChatContext,
+  formatContextForOpenAI,
+} from '@/lib/utils/chat-context';
+import { chatConfig } from '@/lib/config/chat';
 
 export async function POST(
   req: NextRequest,
@@ -19,18 +25,24 @@ export async function POST(
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    // Get chat context from previous messages
+    const contextMessages = chatConfig.context.useRelevantContext
+      ? await getRelevantChatContext(sessionId, content, chatConfig.context.maxWords)
+      : await getChatContext(sessionId, chatConfig.context.maxWords);
+
+    // Format messages with context for OpenAI
+    const systemPrompt = chatConfig.context.systemPrompts.bot;
+    const messagesWithContext = formatContextForOpenAI(contextMessages, systemPrompt);
+
+    // Add current user message
+    messagesWithContext.push({ role: 'user', content: content });
+
     // Generate text response with GPT-4
     const chatCompletion = await openai.chat.completions.create({
       model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a helpful quote generator assistant specialized in creating inspirational and motivational quotes.',
-        },
-        { role: 'user', content: content },
-      ],
-      max_tokens: 500,
+      messages: messagesWithContext,
+      max_tokens: chatConfig.response.maxTokens,
+      temperature: chatConfig.response.temperature,
     });
 
     const assistantContent =

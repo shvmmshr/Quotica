@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { v4 as uuid } from 'uuid';
 import { GoogleGenAI } from '@google/genai';
+import {
+  getChatContext,
+  getRelevantChatContext,
+  formatContextForGemini,
+} from '@/lib/utils/chat-context';
+import { chatConfig } from '@/lib/config/chat';
 
 export async function POST(
   req: NextRequest,
@@ -15,12 +21,27 @@ export async function POST(
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
-    let argContents = content;
+    // Get chat context from previous messages
+    const contextMessages = chatConfig.context.useRelevantContext
+      ? await getRelevantChatContext(sessionId, content, chatConfig.context.maxWords)
+      : await getChatContext(sessionId, chatConfig.context.maxWords);
+
+    // Format context for Gemini
+    const systemPrompt = chatConfig.context.systemPrompts.gemini;
+    const contextString = formatContextForGemini(contextMessages, systemPrompt);
+
+    // Combine context with current content
+    const enhancedContent = contextString + content;
+
+    let argContents:
+      | string
+      | Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> =
+      enhancedContent;
 
     if (image && image !== '') {
       const base64Data = image.split(',')[1];
       argContents = [
-        { text: content },
+        { text: enhancedContent }, // Use enhanced content instead of just content
         {
           inlineData: {
             mimeType: imagefileType || 'image/png',
