@@ -32,6 +32,7 @@ export default function MessageInput({
   const [isProcessing, setIsProcessing] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,90 +63,28 @@ export default function MessageInput({
       return;
     }
 
-    if (imageFile) {
+    if (imageFile && imageBase64) {
       setIsProcessing(true);
       try {
-        // Enhanced image processing for mobile devices
-        const base64String = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-
-          // Add timeout for mobile devices
-          const timeout = setTimeout(() => {
-            reject(new Error('Image processing timeout - file may be too large'));
-          }, 30000); // 30 second timeout
-
-          reader.onload = (event) => {
-            clearTimeout(timeout);
-            const result = event.target?.result as string;
-            if (result && typeof result === 'string') {
-              // Additional validation for mobile compatibility
-              try {
-                // Verify the data URL format
-                if (!result.startsWith('data:image/')) {
-                  throw new Error('Invalid image format');
-                }
-
-                // Check if base64 data exists
-                const base64Part = result.split(',')[1];
-                if (!base64Part || base64Part.length === 0) {
-                  throw new Error('No image data found');
-                }
-
-                // Validate base64 encoding
-                try {
-                  atob(base64Part.substring(0, 100)); // Test decode a small portion
-                } catch (e) {
-                  console.error('Base64 decoding error:', e);
-                  throw new Error('Invalid base64 encoding');
-                }
-
-                // For mobile devices, add a small delay to ensure processing completes
-                setTimeout(() => resolve(result), isMobile ? 200 : 50);
-              } catch (validationError) {
-                reject(validationError);
-              }
-            } else {
-              reject(new Error('Failed to read image file - no result'));
-            }
-          };
-
-          reader.onerror = (error) => {
-            clearTimeout(timeout);
-            console.error('FileReader error:', error);
-            reject(new Error('FileReader error occurred - try a smaller image'));
-          };
-
-          reader.onabort = () => {
-            clearTimeout(timeout);
-            reject(new Error('FileReader operation was aborted'));
-          };
-
-          // Use readAsDataURL for better mobile compatibility
-          try {
-            reader.readAsDataURL(imageFile);
-          } catch (readError) {
-            clearTimeout(timeout);
-            console.error('Failed to start reading image file:', readError);
-            reject(new Error('Failed to start reading image file'));
-          }
-        });
+        // Use the pre-stored Base64 string - no FileReader needed!
+        const base64String = imageBase64;
 
         // Final validation for base64 string
         if (!base64String || !base64String.includes('base64,')) {
-          throw new Error('Invalid image data generated');
+          throw new Error('Invalid image data - please try uploading the image again');
         }
-
-        // Verify the base64 data is not corrupted (mobile devices sometimes have issues)
+        // Verify the base64 data is not corrupted
         const base64Data = base64String.split(',')[1];
         if (!base64Data || base64Data.length < 100) {
-          throw new Error('Image data appears corrupted or too small');
+          throw new Error('Image data appears corrupted - please try uploading again');
         }
 
         const messageText = message;
+        const imageType = imageFile.type;
         clearImage();
         setMessage('');
 
-        await onSendImage(base64String, messageText, selectedOption, imageFile.type);
+        await onSendImage(base64String, messageText, selectedOption, imageType);
 
         toast.success('Image processed successfully');
         setIsProcessing(false);
@@ -156,9 +95,13 @@ export default function MessageInput({
       } catch (error) {
         console.error('Image processing error:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to process image';
-        toast.error(`${errorMessage}. Please try again with a smaller image.`);
+        toast.error(`${errorMessage}. Please try uploading the image again.`);
         setIsProcessing(false);
       }
+    } else if (imageFile && !imageBase64) {
+      // Fallback case - image was selected but Base64 not ready
+      toast.error('Image is still processing. Please wait a moment and try again.');
+      return;
     } else {
       // Text-only messages
       setMessage('');
@@ -231,50 +174,93 @@ export default function MessageInput({
     }
 
     setImageFile(file);
+    // Read and store the Base64 string immediately when file is selected
+    // This prevents mobile FileReader issues later in sendMessage
 
-    // Create preview with enhanced error handling for mobile
     const reader = new FileReader();
 
     // Add timeout for mobile devices
     const timeout = setTimeout(() => {
-      toast.error('Preview generation timeout - your image may be too large');
-    }, 15000); // 15 second timeout
+      toast.error('Image processing timeout - file may be too large');
+      clearImage(); // Clear if processing fails
+    }, 30000); // 30 second timeout
 
     reader.onload = (event) => {
       clearTimeout(timeout);
       const result = event.target?.result as string;
-      if (result) {
-        setImagePreview(result);
+
+      if (result && typeof result === 'string') {
+        try {
+          // Verify the data URL format
+          if (!result.startsWith('data:image/')) {
+            throw new Error('Invalid image format');
+          }
+
+          // Check if base64 data exists
+          const base64Part = result.split(',')[1];
+          if (!base64Part || base64Part.length === 0) {
+            throw new Error('No image data found');
+          }
+
+          // Validate base64 encoding
+          try {
+            atob(base64Part.substring(0, 100)); // Test decode a small portion
+          } catch (e) {
+            console.error('Base64 decoding error:', e);
+            throw new Error('Invalid base64 encoding');
+          }
+
+          // Store the Base64 string for later use in sendMessage
+          setImageBase64(result);
+
+          // Also set it as preview (same data)
+          setImagePreview(result);
+
+          if (isMobile) {
+            toast.success('Image loaded successfully');
+          }
+        } catch (validationError) {
+          console.error('Image validation error:', validationError);
+          toast.error(
+            `Image validation failed: ${validationError instanceof Error ? validationError.message : 'Unknown error'}`
+          );
+          clearImage();
+        }
       } else {
-        console.error('No result from FileReader for preview');
-        toast.error('Could not create image preview');
+        console.error('No result from FileReader');
+        toast.error('Could not read image file');
+        clearImage();
       }
     };
 
     reader.onerror = (error) => {
       clearTimeout(timeout);
-      console.error('Error creating image preview:', error);
-      toast.error('Error creating image preview - try a different image');
+      console.error('Error reading image file:', error);
+      toast.error('Error reading image file - try a different image');
+      clearImage();
     };
 
     reader.onabort = () => {
       clearTimeout(timeout);
-      console.error('Preview generation was aborted');
-      toast.error('Preview generation was cancelled');
+      console.error('Image reading was aborted');
+      toast.error('Image reading was cancelled');
+      clearImage();
     };
 
     try {
       reader.readAsDataURL(file);
     } catch (error) {
       clearTimeout(timeout);
-      console.error('Failed to start reading file for preview:', error);
-      toast.error('Could not read image file for preview');
+      console.error('Failed to start reading file:', error);
+      toast.error('Could not read image file');
+      clearImage();
     }
   };
 
   const clearImage = () => {
     setImagePreview(null);
     setImageFile(null);
+    setImageBase64(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
