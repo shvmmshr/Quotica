@@ -9,6 +9,7 @@ import { ChatSession as Chat, Message } from '../types';
 import { v4 as uuid } from 'uuid';
 import { modelOptions } from '@/lib/models';
 import { useCredits } from '@/app/context/creditsContext';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -216,19 +217,47 @@ export default function ChatMainArea({
       let imageKitUrl = '';
       if (imageBase64) {
         const fileName = `upload_${uuid()}.png`;
-        const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageUrl: imageBase64,
-            fileName,
-            sessionId: currentChat.id,
-          }),
-        });
 
-        if (!uploadResponse.ok) throw new Error('Failed to upload image to ImageKit');
-        const { url } = await uploadResponse.json();
-        imageKitUrl = url;
+        // Enhanced error handling for mobile image uploads
+        let uploadAttempts = 0;
+        const maxAttempts = 3;
+
+        while (uploadAttempts < maxAttempts) {
+          try {
+            const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/imagekit`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageUrl: imageBase64,
+                fileName,
+                sessionId: currentChat.id,
+              }),
+            });
+
+            if (!uploadResponse.ok) {
+              const errorData = await uploadResponse.json().catch(() => ({}));
+              throw new Error(
+                errorData.message || `Upload failed with status: ${uploadResponse.status}`
+              );
+            }
+
+            const { url } = await uploadResponse.json();
+            imageKitUrl = url;
+            break; // Success, exit retry loop
+          } catch (uploadError) {
+            uploadAttempts++;
+            console.error(`Image upload attempt ${uploadAttempts} failed:`, uploadError);
+
+            if (uploadAttempts >= maxAttempts) {
+              throw new Error(
+                `Failed to upload image after ${maxAttempts} attempts: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`
+              );
+            }
+
+            // Wait before retrying (exponential backoff)
+            await new Promise((resolve) => setTimeout(resolve, 1000 * uploadAttempts));
+          }
+        }
       }
 
       // Save the user message to the chat history
@@ -272,51 +301,92 @@ export default function ChatMainArea({
           ? `/api/${modelType}/${currentChat.id}/edit`
           : `/api/${modelType}/${currentChat.id}/image`;
 
-      // Make API request
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          endpoint.includes('/edit')
-            ? {
-                prompt,
-                imageBase64,
-                quality: selectedOption.quality || 'standard',
-                size: selectedOption.size || '1024x1024',
-              }
-            : requestBody
-        ),
-      });
+      // Make API request with enhanced timeout handling for mobile
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate image: ${response.statusText}`);
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            endpoint.includes('/edit')
+              ? {
+                  prompt,
+                  imageBase64,
+                  quality: selectedOption.quality || 'standard',
+                  size: selectedOption.size || '1024x1024',
+                }
+              : requestBody
+          ),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `Failed to generate image: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        // Success handling continues as before...
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: uuid(),
+            chatSessionId: currentChat.id,
+            imageUrl: result.imageUrl || undefined,
+            content: result.content || undefined,
+            promt: prompt,
+            role: 'assistant',
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+        setIsGeneratingImage(false);
+
+        // Deduct credits for the operation
+        await deductCredits(selectedOption.credits);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          throw new Error(
+            'Request timed out. Please check your internet connection and try again.'
+          );
+        }
+
+        throw fetchError;
       }
-
-      const result = await response.json();
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      // Add AI response to message list
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: uuid(),
-          chatSessionId: currentChat.id,
-          imageUrl: result.imageUrl || undefined,
-          content: result.content || undefined,
-          promt: prompt,
-          role: 'assistant',
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-      setIsGeneratingImage(false);
-
-      // Deduct credits for the operation
-      await deductCredits(selectedOption.credits);
     } catch (error) {
       console.error('Error processing image:', error);
+
+      // Enhanced error reporting for mobile debugging
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      let userFriendlyMessage = 'Failed to process image. ';
+
+      if (errorMessage.includes('upload')) {
+        userFriendlyMessage +=
+          'There was an issue uploading your image. Please try again with a smaller image.';
+      } else if (errorMessage.includes('timeout')) {
+        userFriendlyMessage += 'The request timed out. Please check your connection and try again.';
+      } else if (errorMessage.includes('base64') || errorMessage.includes('Invalid image')) {
+        userFriendlyMessage +=
+          'There was an issue with your image format. Please try a different image.';
+      } else if (errorMessage.includes('size') || errorMessage.includes('large')) {
+        userFriendlyMessage += 'Your image is too large. Please use a smaller image.';
+      } else {
+        userFriendlyMessage += 'Please try again or contact support if the problem continues.';
+      }
+
+      toast.error(userFriendlyMessage);
 
       // Mark message as failed
       setMessages((prevMessages) =>

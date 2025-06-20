@@ -65,37 +65,87 @@ export default function MessageInput({
     if (imageFile) {
       setIsProcessing(true);
       try {
+        // Enhanced image processing for mobile devices
         const base64String = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
 
+          // Add timeout for mobile devices
+          const timeout = setTimeout(() => {
+            reject(new Error('Image processing timeout - file may be too large'));
+          }, 30000); // 30 second timeout
+
           reader.onload = (event) => {
+            clearTimeout(timeout);
             const result = event.target?.result as string;
-            if (result) {
-              setTimeout(() => resolve(result), 100);
+            if (result && typeof result === 'string') {
+              // Additional validation for mobile compatibility
+              try {
+                // Verify the data URL format
+                if (!result.startsWith('data:image/')) {
+                  throw new Error('Invalid image format');
+                }
+
+                // Check if base64 data exists
+                const base64Part = result.split(',')[1];
+                if (!base64Part || base64Part.length === 0) {
+                  throw new Error('No image data found');
+                }
+
+                // Validate base64 encoding
+                try {
+                  atob(base64Part.substring(0, 100)); // Test decode a small portion
+                } catch (e) {
+                  console.error('Base64 decoding error:', e);
+                  throw new Error('Invalid base64 encoding');
+                }
+
+                // For mobile devices, add a small delay to ensure processing completes
+                setTimeout(() => resolve(result), isMobile ? 200 : 50);
+              } catch (validationError) {
+                reject(validationError);
+              }
             } else {
-              reject(new Error('Failed to read image file'));
+              reject(new Error('Failed to read image file - no result'));
             }
           };
 
-          reader.onerror = () => {
-            reject(new Error('FileReader error occurred'));
+          reader.onerror = (error) => {
+            clearTimeout(timeout);
+            console.error('FileReader error:', error);
+            reject(new Error('FileReader error occurred - try a smaller image'));
           };
 
           reader.onabort = () => {
+            clearTimeout(timeout);
             reject(new Error('FileReader operation was aborted'));
           };
 
           // Use readAsDataURL for better mobile compatibility
-          reader.readAsDataURL(imageFile);
+          try {
+            reader.readAsDataURL(imageFile);
+          } catch (readError) {
+            clearTimeout(timeout);
+            console.error('Failed to start reading image file:', readError);
+            reject(new Error('Failed to start reading image file'));
+          }
         });
 
-        // Add validation for base64 string
+        // Final validation for base64 string
         if (!base64String || !base64String.includes('base64,')) {
           throw new Error('Invalid image data generated');
         }
+
+        // Verify the base64 data is not corrupted (mobile devices sometimes have issues)
+        const base64Data = base64String.split(',')[1];
+        if (!base64Data || base64Data.length < 100) {
+          throw new Error('Image data appears corrupted or too small');
+        }
+
+        const messageText = message;
         clearImage();
         setMessage('');
-        await onSendImage(base64String, message, selectedOption, imageFile.type);
+
+        await onSendImage(base64String, messageText, selectedOption, imageFile.type);
 
         toast.success('Image processed successfully');
         setIsProcessing(false);
@@ -105,7 +155,8 @@ export default function MessageInput({
         }
       } catch (error) {
         console.error('Image processing error:', error);
-        toast.error('Failed to process image. Please try again.');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to process image';
+        toast.error(`${errorMessage}. Please try again with a smaller image.`);
         setIsProcessing(false);
       }
     } else {
@@ -136,34 +187,89 @@ export default function MessageInput({
     }
 
     // Increased size limit for mobile photos (they tend to be larger)
-    if (file.size > 10 * 1024 * 1024) {
-      // 10MB limit instead of 5MB
-      toast.error('Image size should be less than 10MB');
+    if (file.size > 15 * 1024 * 1024) {
+      // 15MB limit for mobile compatibility
+      toast.error('Image size should be less than 15MB');
       return;
     }
 
-    // Additional check for common mobile image formats
-    const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic'];
+    // Enhanced format support for mobile devices
+    const supportedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+      'image/avif',
+    ];
+
     if (!supportedTypes.includes(file.type.toLowerCase())) {
-      toast.error('Unsupported image format. Please use JPEG, PNG, or WebP.');
+      toast.error('Unsupported image format. Please use JPEG, PNG, WebP, or HEIC.');
       return;
+    }
+
+    // Additional mobile-specific checks
+    if (isMobile) {
+      // Check for very large dimensions that might cause issues
+      const img = document.createElement('img');
+      img.onload = function () {
+        // If image is too large, we'll process it normally but warn the user
+        const imgElement = img as HTMLImageElement;
+        if (imgElement.width * imgElement.height > 16777216) {
+          // 4096x4096 pixels
+          toast.error('Image resolution is very high. Processing may take longer on mobile.');
+        }
+      };
+
+      // Create object URL for dimension checking (won't affect the actual processing)
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+
+      // Clean up object URL after check
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     }
 
     setImageFile(file);
 
-    // Create preview with error handling
+    // Create preview with enhanced error handling for mobile
     const reader = new FileReader();
+
+    // Add timeout for mobile devices
+    const timeout = setTimeout(() => {
+      toast.error('Preview generation timeout - your image may be too large');
+    }, 15000); // 15 second timeout
+
     reader.onload = (event) => {
+      clearTimeout(timeout);
       const result = event.target?.result as string;
       if (result) {
         setImagePreview(result);
+      } else {
+        console.error('No result from FileReader for preview');
+        toast.error('Could not create image preview');
       }
     };
-    reader.onerror = () => {
-      console.error('Error creating image preview');
-      toast.error('Error creating image preview');
+
+    reader.onerror = (error) => {
+      clearTimeout(timeout);
+      console.error('Error creating image preview:', error);
+      toast.error('Error creating image preview - try a different image');
     };
-    reader.readAsDataURL(file);
+
+    reader.onabort = () => {
+      clearTimeout(timeout);
+      console.error('Preview generation was aborted');
+      toast.error('Preview generation was cancelled');
+    };
+
+    try {
+      reader.readAsDataURL(file);
+    } catch (error) {
+      clearTimeout(timeout);
+      console.error('Failed to start reading file for preview:', error);
+      toast.error('Could not read image file for preview');
+    }
   };
 
   const clearImage = () => {
@@ -248,8 +354,12 @@ export default function MessageInput({
             onKeyDown={handleKeyDown}
             placeholder={
               imageFile
-                ? 'Tell me what to do with the image using a prompt...'
-                : 'Message Quotica or upload an image...'
+                ? isMobile
+                  ? 'Describe what to do with the image...'
+                  : 'Tell me what to do with the image using a prompt...'
+                : isMobile
+                  ? 'Type a message or upload an image...'
+                  : 'Message Quotica or upload an image...'
             }
             className={cn(
               'overflow-y-auto flex-1 border border-transparent bg-transparent focus-visible:ring-0 focus-visible:outline-none resize-none leading-relaxed',
@@ -278,7 +388,7 @@ export default function MessageInput({
             ) : (
               <ArrowUpIcon size={isMobile ? 18 : 24} />
             )}
-            <span className="sr-only">Send message</span>
+            <span className="sr-only">{isProcessing ? 'Processing image...' : 'Send message'}</span>
           </Button>
         </div>
 
