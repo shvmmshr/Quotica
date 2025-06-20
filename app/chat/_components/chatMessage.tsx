@@ -105,9 +105,7 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
             )}
 
             {/* Text content */}
-            {hasContent && (
-              <div className={hasImage || hasPrompt ? 'mt-2' : ''}>{message.content}</div>
-            )}
+            {hasContent && <div className={hasImage ? 'mt-2' : ''}>{message.content}</div>}
 
             {/* Error message */}
             {hasError && (
