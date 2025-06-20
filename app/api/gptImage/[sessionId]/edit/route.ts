@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { v4 as uuid } from 'uuid';
 import OpenAI, { toFile } from 'openai';
+import { getChatContext, getRelevantChatContext } from '@/lib/utils/chat-context';
+import { chatConfig } from '@/lib/config/chat';
 
 export async function POST(
   req: NextRequest,
@@ -20,6 +22,26 @@ export async function POST(
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    // Get chat context from previous messages
+    const contextMessages = chatConfig.context.useRelevantContext
+      ? await getRelevantChatContext(sessionId, prompt, chatConfig.context.maxWords)
+      : await getChatContext(sessionId, chatConfig.context.maxWords);
+
+    // Create enhanced prompt with context for better image editing
+    let enhancedPrompt = prompt;
+    if (contextMessages.length > 0) {
+      // Get the last few messages for immediate context
+      const recentContext = contextMessages
+        .slice(-5)
+        .map((msg) => {
+          const role = msg.role === 'assistant' ? 'Previous generation' : 'Previous request';
+          return `${role}: ${msg.content}`;
+        })
+        .join('\n');
+
+      enhancedPrompt = `${chatConfig.context.systemPrompts.gptImage}\n\nContext from recent conversation:\n${recentContext}\n\nCurrent edit request: ${prompt}`;
+    }
+
     // Extract base64 data - handle both with and without data URI prefix
     const base64Data = imageBase64.includes('base64,')
       ? imageBase64.split('base64,')[1]
@@ -36,7 +58,7 @@ export async function POST(
     const response = await openai.images.edit({
       model: 'gpt-image-1',
       image: imageFile,
-      prompt: prompt,
+      prompt: enhancedPrompt, // Use enhanced prompt with context
       n: 1,
       // @ts-expect-error because no type definition for size
       size: size as '1024x1024' | '1024x1536' | '1536x1024',

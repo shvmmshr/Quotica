@@ -19,8 +19,8 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Quotica - Beautiful Quote Image Generator',
-  description: 'Create beautiful quote images for social media',
+  title: 'Quotica - Beautiful Image Generator',
+  description: 'Create beautiful images for social media',
 };
 
 export default function RootLayout({
@@ -33,10 +33,10 @@ export default function RootLayout({
       <CreditsProvider>
         <html lang="en" suppressHydrationWarning>
           <body className={inter.className}>
-            <ThemeProvider 
-              attribute="class" 
-              defaultTheme="system" 
-              enableSystem 
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
               enableColorScheme={false}
               disableTransitionOnChange
             >
