@@ -52,6 +52,11 @@ export default function MessageInput({
   const sendMessage = async () => {
     if (!message.trim() && !imageFile) return;
 
+    if (imageFile && !message.trim()) {
+      toast.error('Please add a prompt to describe what you want me to do with the image.');
+      return;
+    }
+
     if (credits < currentOption.credits) {
       toast.error(`Not enough credits! This option requires ${currentOption.credits} credits.`);
       return;
@@ -60,14 +65,13 @@ export default function MessageInput({
     if (imageFile) {
       setIsProcessing(true);
       try {
-        // Enhanced mobile-friendly image processing
         const base64String = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
 
           reader.onload = (event) => {
             const result = event.target?.result as string;
             if (result) {
-              resolve(result);
+              setTimeout(() => resolve(result), 100);
             } else {
               reject(new Error('Failed to read image file'));
             }
@@ -85,17 +89,20 @@ export default function MessageInput({
           reader.readAsDataURL(imageFile);
         });
 
-        clearImage();
-
         // Add validation for base64 string
         if (!base64String || !base64String.includes('base64,')) {
           throw new Error('Invalid image data generated');
         }
-
-        await onSendImage(base64String, message, selectedOption, imageFile.type);
-        toast.success('Image processed');
+        clearImage();
         setMessage('');
+        await onSendImage(base64String, message, selectedOption, imageFile.type);
+
+        toast.success('Image processed successfully');
         setIsProcessing(false);
+
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+        }
       } catch (error) {
         console.error('Image processing error:', error);
         toast.error('Failed to process image. Please try again.');
@@ -103,8 +110,9 @@ export default function MessageInput({
       }
     } else {
       // Text-only messages
-      onSendMessage(message, selectedOption);
       setMessage('');
+      onSendMessage(message, selectedOption);
+
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
@@ -239,7 +247,9 @@ export default function MessageInput({
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              imageFile ? 'Add a prompt (optional)...' : 'Message Quotica or upload an image...'
+              imageFile
+                ? 'Tell me what to do with the image using a prompt...'
+                : 'Message Quotica or upload an image...'
             }
             className={cn(
               'overflow-y-auto flex-1 border border-transparent bg-transparent focus-visible:ring-0 focus-visible:outline-none resize-none leading-relaxed',
@@ -259,6 +269,9 @@ export default function MessageInput({
               'shrink-0 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground',
               isMobile ? 'h-10 w-10' : 'h-12 w-12'
             )}
+            title={
+              imageFile && !message.trim() ? 'Add a prompt to send with image' : 'Send message'
+            }
           >
             {isProcessing ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
