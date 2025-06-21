@@ -46,11 +46,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Quotica: Smart Image Generator and Management Tool',
     description: 'Create, manage, and share beautiful images instantly.',
-    url: 'https://quotica.app',
+    url: 'https://quotica.fun',
     siteName: 'Quotica',
     images: [
       {
-        url: 'https://quotica.app/og-image.png',
+        url: 'https://quotica.fun/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Quotica Interface Preview',
@@ -61,9 +61,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Quotica: Smart Quote Generator and Management Tool',
-    description: 'Create, manage, and share beautiful quotes instantly',
-    images: ['https://quotica.app/og-image.png'],
+    title: 'Quotica: Smart Image Generator and Management Tool',
+    description: 'Create, manage, and share beautiful images instantly',
+    images: ['https://quotica.fun/og-image.png'],
   },
   robots: {
     index: true,
