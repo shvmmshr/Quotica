@@ -133,12 +133,12 @@ export default function Header() {
 
             <SignedOut>
               <div className="hidden md:flex items-center gap-2">
-                <SignInButton>
+                <SignInButton mode="modal">
                   <Button variant="ghost" size="sm" className="cursor-pointer">
                     Sign In
                   </Button>
                 </SignInButton>
-                <SignUpButton>
+                <SignUpButton mode="modal">
                   <Button size="sm" className="bg-primary hover:bg-primary/90 cursor-pointer">
                     Sign Up
                   </Button>
@@ -204,12 +204,12 @@ export default function Header() {
 
               <SignedOut>
                 <div className="flex flex-col space-y-2 pt-2">
-                  <SignInButton>
+                  <SignInButton mode="modal">
                     <Button variant="outline" className="w-full">
                       Sign In
                     </Button>
                   </SignInButton>
-                  <SignUpButton>
+                  <SignUpButton mode="modal">
                     <Button className="w-full bg-primary hover:bg-primary/90">Sign Up</Button>
                   </SignUpButton>
                 </div>
