@@ -355,7 +355,7 @@ const HeroSection: React.FC = () => {
                   >
                     <Button
                       size="lg"
-                      className="gap-2 px-6 rounded-full bg-primary hover:bg-primary/90"
+                      className="gap-2 px-6 rounded-full bg-primary hover:bg-primary/90 cursor-pointer"
                     >
                       Chat Now <ArrowTopRightIcon className="h-4 w-4" />
                     </Button>
@@ -373,7 +373,11 @@ const HeroSection: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button size="lg" variant="outline" className="gap-2 px-6 rounded-full">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="gap-2 px-6 rounded-full cursor-pointer"
+                    >
                       View Pricing
                     </Button>
                   </motion.div>
@@ -530,7 +534,7 @@ const HeroSection: React.FC = () => {
                     >
                       <Button
                         size="lg"
-                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90 cursor-pointer"
                       >
                         Try It Now <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
@@ -538,7 +542,7 @@ const HeroSection: React.FC = () => {
                   </Link>
                 </SignedIn>
                 <SignedOut>
-                  <SignInButton>
+                  <SignInButton mode="modal">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -546,7 +550,7 @@ const HeroSection: React.FC = () => {
                     >
                       <Button
                         size="lg"
-                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90 cursor-pointer"
                       >
                         Sign In to Try <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
@@ -639,7 +643,7 @@ const HeroSection: React.FC = () => {
                     >
                       <Button
                         size="lg"
-                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90 cursor-pointer"
                       >
                         Create Ads Now <ArrowTopRightIcon className="ml-2 h-4 w-4" />
                       </Button>
@@ -647,7 +651,7 @@ const HeroSection: React.FC = () => {
                   </Link>
                 </SignedIn>
                 <SignedOut>
-                  <SignInButton>
+                  <SignInButton mode="modal">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -655,9 +659,9 @@ const HeroSection: React.FC = () => {
                     >
                       <Button
                         size="lg"
-                        className="rounded-full px-8 bg-primary hover:bg-primary/90"
+                        className="rounded-full px-8 bg-primary hover:bg-primary/90 cursor-pointer"
                       >
-                        Sign In to Create <ArrowTopRightIcon className="ml-2 h-4 w-4" />
+                        Sign In to Create <ArrowTopRightIcon className="ml-2 h-4 w-4 " />
                       </Button>
                     </motion.div>
                   </SignInButton>
