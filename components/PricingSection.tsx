@@ -17,14 +17,13 @@ const PricingSection = () => {
   const freeBenefits = [
     { text: 'Gemini for free', checked: true },
     { text: 'Basic image generation', checked: true },
-    { text: 'Limited style options', checked: true },
-    // { text: 'Share on social media', checked: true },
+    { text: 'Share on social media', checked: true },
     { text: 'Priority support', checked: false },
     { text: 'Advanced customization', checked: false },
   ];
 
   const proBenefits = [
-    // { text: '100 credits', checked: true },
+    { text: '12500 credits', checked: true },
     { text: 'Advanced image generation', checked: true },
     { text: 'All style options', checked: true },
     { text: 'Share on social media', checked: true },
@@ -36,7 +35,7 @@ const PricingSection = () => {
     { text: 'Unlimited credits', checked: true },
     { text: 'Premium image generation', checked: true },
     { text: 'All style options', checked: true },
-    // { text: 'Share on social media', checked: true },
+    { text: 'Share on social media', checked: true },
     { text: 'Dedicated support', checked: true },
     { text: 'Custom branding', checked: true },
   ];

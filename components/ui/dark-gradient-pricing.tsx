@@ -73,11 +73,16 @@ export const PricingCard = ({
           ))}
         </div>
         <Button
-          className="w-full"
+          className="w-full cursor-pointer"
           variant={tier === 'Pro' ? 'default' : 'outline'}
           onClick={() => {
-            toast.info(`Coming Soon...`);
-            // toast.success(`Coming Soon`);
+            if (tier === 'Free') {
+              window.location.href = '/chat';
+            } else if (tier === 'Pro') {
+              toast.info('Coming soon!');
+            } else if (tier === 'Enterprise') {
+              window.location.href = '/contact';
+            }
           }}
         >
           {CTA}
